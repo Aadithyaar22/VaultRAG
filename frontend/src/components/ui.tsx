@@ -140,7 +140,7 @@ export const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...p} className={`glow-focus w-full rounded-full border border-white/12 bg-black/30 px-5 py-3 text-sm placeholder:text-slate-500 ${p.className || ""}`} />
 );
 
-export const Stat = ({ label, value, hint, c: _c }: { label: string; value: ReactNode; hint?: string; c?: string }) => (
+export const Stat = ({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) => (
   <div className="liquid p-5" style={{ background: `radial-gradient(130% 100% at 0% 0%, #efe6d226, transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))`, boxShadow: `inset 0 2px 0 0 #efe6d255, 0 24px 60px -28px rgba(0,0,0,0.75)` }}>
     <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-300"><span className="h-2 w-2 rounded-full" style={{ background: "#efe6d2", boxShadow: "0 0 10px rgba(239,230,210,0.6)" }} aria-hidden />{label}</div>
     <div className="mt-2 font-display text-4xl font-bold tracking-tight text-white">{value}</div>
