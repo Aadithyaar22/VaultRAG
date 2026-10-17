@@ -21,9 +21,9 @@ export const icons = {
 /** VaultRAG mark: a droplet-shaped shield with a keyhole — liquid + security in one shape. */
 export const Logo = ({ size = 28 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-    <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#a7f3e6" /><stop offset="1" stopColor="#6ea0ff" /></linearGradient></defs>
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor="#d6c9ac" /></linearGradient></defs>
     <path d="M16 2c6 5 11 7 11 14 0 7-5 12-11 14C10 28 5 23 5 16 5 9 10 7 16 2z" fill="url(#lg)" />
-    <circle cx="16" cy="14.5" r="3" fill="#050813" /><path d="M14.6 16.5h2.8l.8 6h-4.4z" fill="#050813" />
+    <circle cx="16" cy="14.5" r="3" fill="#070706" /><path d="M14.6 16.5h2.8l.8 6h-4.4z" fill="#070706" />
   </svg>
 );
 
@@ -51,28 +51,32 @@ export const PageHeader = ({ title, desc, right }: { title: string; desc: string
   </div>
 );
 
+// Status is carried by shape and weight, not hue: filled = ok, hollow/dashed = caution, inverted = blocked.
 const tones: Record<string, string> = {
-  ok: "bg-emerald-400/10 text-emerald-300 border-emerald-400/30",
-  warn: "bg-amber-400/10 text-amber-300 border-amber-400/30",
-  bad: "bg-rose-400/10 text-rose-300 border-rose-400/30",
-  info: "bg-violet-400/10 text-violet-200 border-violet-300/30",
-  mute: "bg-white/5 text-slate-300 border-white/10",
+  ok: "bg-[#efe6d2]/12 text-[#efe6d2] border-[#efe6d2]/40",
+  warn: "bg-transparent text-[#d8cdb4] border-dashed border-[#d8cdb4]/60",
+  bad: "bg-[#efe6d2] text-[#0b0a08] border-[#efe6d2]",
+  info: "bg-white/6 text-white/90 border-white/20",
+  mute: "bg-white/5 text-white/60 border-white/10",
+};
+const beads: Record<string, string> = {
+  ok: "bg-current bead", warn: "border border-current", bad: "bg-[#0b0a08]", info: "bg-white/70",
 };
 export const Badge = ({ tone = "mute", children }: { tone?: keyof typeof tones; children: ReactNode }) => (
   <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none tracking-wide ${tones[tone]}`}>
-    {tone !== "mute" && <span className="bead" aria-hidden />}{children}
+    {tone !== "mute" && <span className={`inline-block h-1.5 w-1.5 rounded-full ${beads[tone]}`} aria-hidden />}{children}
   </span>
 );
 
 /* ---------- buttons ---------- */
 type Variant = "primary" | "ghost" | "danger";
 /** Primary buttons follow the current page accent (--accent), falling back to teal. */
-const ACCENT_BG = "linear-gradient(120deg, var(--accent, #5eead4), color-mix(in srgb, var(--accent, #5eead4) 45%, #8b7bff))";
-const ACCENT_GLOW = "0 0 30px -6px color-mix(in srgb, var(--accent, #5eead4) 70%, transparent)";
+const ACCENT_BG = "linear-gradient(120deg, #efe6d2, #ffffff)";
+const ACCENT_GLOW = "0 0 30px -8px rgba(239, 230, 210, 0.55)";
 const variantCls: Record<Variant, string> = {
   primary: "text-ink",
   ghost: "border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10 hover:border-white/25",
-  danger: "border border-rose-400/50 bg-rose-400/10 text-rose-200 hover:bg-rose-400/20 hover:shadow-[0_0_24px_-4px_rgba(251,113,133,0.5)]",
+  danger: "border border-white/45 bg-transparent text-white hover:bg-white/10 hover:border-white/70",
 };
 export const Button = ({ variant = "primary", busy, className = "", children, ...p }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; busy?: boolean }) => (
   <button {...p} disabled={p.disabled || busy}
@@ -122,7 +126,7 @@ export function SplitButton({ label, onClick, items, variant = "primary", busy, 
           className="liquid z-50 min-w-64 max-w-[calc(100vw-1rem)] !rounded-2xl p-1.5 text-left">
           {items.map(it => (
             <button key={it.label} role="menuitem" onClick={() => { setOpen(false); it.onClick(); }}
-              className={`block w-full rounded-xl px-3.5 py-2.5 text-left transition hover:bg-white/10 ${it.danger ? "text-rose-300" : "text-slate-100"}`}>
+              className={`block w-full rounded-xl px-3.5 py-2.5 text-left transition hover:bg-white/10 ${it.danger ? "font-semibold text-white" : "text-slate-100"}`}>
               <span className="block text-sm font-medium">{it.label}</span>
               {it.hint && <span className="mt-0.5 block text-xs font-normal text-slate-400">{it.hint}</span>}
             </button>
@@ -136,16 +140,16 @@ export const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...p} className={`glow-focus w-full rounded-full border border-white/12 bg-black/30 px-5 py-3 text-sm placeholder:text-slate-500 ${p.className || ""}`} />
 );
 
-export const Stat = ({ label, value, hint, c = "#5eead4" }: { label: string; value: ReactNode; hint?: string; c?: string }) => (
-  <div className="liquid p-5" style={{ background: `radial-gradient(130% 100% at 0% 0%, ${c}26, transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))`, boxShadow: `inset 0 2px 0 0 ${c}77, 0 24px 60px -28px rgba(0,0,0,0.75)` }}>
-    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-300"><span className="h-2 w-2 rounded-full" style={{ background: c, boxShadow: `0 0 10px ${c}` }} aria-hidden />{label}</div>
+export const Stat = ({ label, value, hint, c: _c }: { label: string; value: ReactNode; hint?: string; c?: string }) => (
+  <div className="liquid p-5" style={{ background: `radial-gradient(130% 100% at 0% 0%, #efe6d226, transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))`, boxShadow: `inset 0 2px 0 0 #efe6d255, 0 24px 60px -28px rgba(0,0,0,0.75)` }}>
+    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-300"><span className="h-2 w-2 rounded-full" style={{ background: "#efe6d2", boxShadow: "0 0 10px rgba(239,230,210,0.6)" }} aria-hidden />{label}</div>
     <div className="mt-2 font-display text-4xl font-bold tracking-tight text-white">{value}</div>
     {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
   </div>
 );
 
 export const statusTone = (s: string) => ({ answered: "ok", abstained: "warn", denied: "bad", error: "bad", released: "ok", blocked: "bad", flagged: "warn", discarded: "bad", ok: "ok" } as Record<string, any>)[s] || "mute";
-export const ErrorNote = ({ msg }: { msg: string | null }) => msg ? <div role="alert" className="rounded-2xl border border-rose-400/40 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{msg}</div> : null;
+export const ErrorNote = ({ msg }: { msg: string | null }) => msg ? <div role="alert" className="rounded-2xl border border-[#efe6d2]/50 bg-[#efe6d2]/10 px-4 py-3 text-sm text-[#efe6d2]"><b className="font-semibold">Error · </b>{msg}</div> : null;
 
 /** Minimal inline markdown (bold only) for model answers; everything else renders as plain text (no HTML injection). */
 export const RichText = ({ text }: { text: string }) => (

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 // Live aurora background (WebGL). Evolved from the Stitch fog shader:
-//  - four-colour palette (teal / blue / violet / magenta) drifting on slow flow fields
-//  - pointer-reactive: the field bends around the cursor, swirls with cursor speed, and glows
+//  - monochrome palette (black / warm grey / cream / white) drifting on slow flow fields
+//  - pointer-reactive but calm: slow-following, subtle bend and swirl, faint warm glow
 //  - ambient drift is user-switchable (defaults to the OS reduced-motion setting); pointer response always works,
 //    pauses when the tab is hidden,
 //    renders at reduced resolution, and falls back silently when WebGL is unavailable.
@@ -36,29 +36,28 @@ void main(){
   // pointer: lens-bend + swirl that grows with cursor speed
   vec2 d=p-m; float dist=length(d);
   float fall=exp(-dist*dist*2.2);
-  p+= -d*fall*0.28;
-  p = m + rot(u_energy*1.8*fall)*(p-m);
+  p+= -d*fall*0.10;
+  p = m + rot(u_energy*0.55*fall)*(p-m);
 
   // flowing fields
   vec2 q=vec2(fbm(p*0.55+vec2(t,-t*0.7)), fbm(p*0.55+vec2(-t*0.8,t)+4.2));
   vec2 r=vec2(fbm(p*0.6+1.5*q+vec2(1.7,9.2)+t*0.6), fbm(p*0.6+1.5*q+vec2(8.3,2.8)-t*0.5));
   float f=fbm(p*0.5+1.6*r);
 
-  vec3 base  = vec3(0.012,0.020,0.050);
-  vec3 teal  = vec3(0.07,0.80,0.74);
-  vec3 blue  = vec3(0.16,0.42,1.00);
-  vec3 violet= vec3(0.50,0.32,1.00);
-  vec3 pink  = vec3(0.96,0.28,0.66);
+  // black / warm-grey / cream / white only
+  vec3 base  = vec3(0.012,0.011,0.010);
+  vec3 grey  = vec3(0.20,0.19,0.17);
+  vec3 cream = vec3(0.86,0.79,0.64);
+  vec3 white = vec3(1.0,0.98,0.94);
 
   vec3 col=base;
-  col=mix(col,blue,  smoothstep(-0.3,0.6,q.x)*0.85);
-  col=mix(col,teal,  smoothstep(-0.1,0.7,r.y)*0.80);
-  col=mix(col,violet,smoothstep(-0.2,0.7,r.x)*0.80);
-  col=mix(col,pink,  smoothstep(0.05,0.8,f+0.2*q.y)*0.70);
+  col=mix(col,grey, smoothstep(-0.35,0.65,q.x)*0.85);
+  col=mix(col,cream*0.55,smoothstep(-0.05,0.75,r.y)*0.55);
+  col=mix(col,cream*0.75,smoothstep(0.15,0.95,f+0.2*q.y)*0.40);
+  col+= white*smoothstep(0.45,1.0,f+0.3*r.x)*0.16;                        // soft highlights
 
-  // pointer glow whose colour drifts with time; stronger when moving
-  vec3 gc=0.5+0.5*cos(6.2831*(vec3(0.0,0.33,0.67)+u_time*0.05));
-  col+= mix(vec3(0.25,0.7,0.9),gc,0.6) * exp(-dist*dist*5.5) * (0.20+0.55*u_energy);
+  // very gentle warm glow at the (smoothed) pointer
+  col+= cream * exp(-dist*dist*3.5) * (0.05+0.12*u_energy);
 
   col*= 1.0-smoothstep(0.55,1.6,length(uv-0.5)*1.4)*0.5;                  // vignette
   gl_FragColor=vec4(col,1.0);
@@ -98,9 +97,9 @@ export default function ShaderBackground({ dim = 0.72, ambient = true }: { dim?:
     const FROZEN = 9000; // ms: time value used for the still frame when ambient drift is off
     const draw = (t: number) => {
       const dx = target.x - smooth.x, dy = target.y - smooth.y;
-      smooth.x += dx * 0.07; smooth.y += dy * 0.07;
-      const speed = Math.min(1, Math.hypot(dx, dy) / (canvas.width * 0.25));
-      energy = Math.max(speed, energy * 0.96);
+      smooth.x += dx * 0.025; smooth.y += dy * 0.025;
+      const speed = Math.min(1, Math.hypot(dx, dy) / (canvas.width * 0.6)) * 0.6;
+      energy = Math.max(speed, energy * 0.93);
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.uniform1f(uT, (ambientRef.current ? t : FROZEN) * 0.001); gl.uniform2f(uR, canvas.width, canvas.height);
       gl.uniform2f(uM, smooth.x, smooth.y); gl.uniform1f(uE, energy);
@@ -124,7 +123,7 @@ export default function ShaderBackground({ dim = 0.72, ambient = true }: { dim?:
   }, []);
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#050813]">
-      <canvas ref={ref} className="block h-full w-full" style={{ filter: "blur(10px) saturate(125%)", transform: "scale(1.08)" }} />
+      <canvas ref={ref} className="block h-full w-full" style={{ filter: "blur(12px)", transform: "scale(1.08)" }} />
       <div className="absolute inset-0" style={{ background: `rgba(4,7,17,${dim})` }} />
     </div>
   );

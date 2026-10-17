@@ -18,12 +18,12 @@ function loadAmbient(): boolean {
 type Tab = "chat" | "dashboard" | "vault" | "users" | "security" | "demo";
 type Item = { id: Tab; label: string; desc: string; icon: ReactNode; cap?: string; c: string };
 const NAV: Item[] = [
-  { id: "chat", c: "#5eead4", label: "Secure Chat", icon: icons.chat, desc: "Ask questions in plain language. Answers use only documents your role may read." },
-  { id: "dashboard", c: "#60a5fa", label: "Dashboard", icon: icons.dashboard, desc: "Live counts of queries, blocked answers and permission changes." },
-  { id: "vault", c: "#a78bfa", label: "Document Vault", icon: icons.vault, desc: "Upload documents, track versions and decide who can read each one." },
-  { id: "users", c: "#fbbf24", label: "Users & Roles", icon: icons.users, cap: "manage_roles", desc: "Change a person's roles. Their cached answers are invalidated immediately." },
-  { id: "security", c: "#fb7185", label: "Security Center", icon: icons.shield, cap: "review_security", desc: "Audit trail, user risk scores and the models running on this server." },
-  { id: "demo", c: "#e879f9", label: "Demo Controls", icon: icons.sliders, cap: "demo_controls", desc: "Run the demo scenario: revoke access, simulate an outage, upload a poisoned file." },
+  { id: "chat", c: "#efe6d2", label: "Secure Chat", icon: icons.chat, desc: "Ask questions in plain language. Answers use only documents your role may read." },
+  { id: "dashboard", c: "#efe6d2", label: "Dashboard", icon: icons.dashboard, desc: "Live counts of queries, blocked answers and permission changes." },
+  { id: "vault", c: "#efe6d2", label: "Document Vault", icon: icons.vault, desc: "Upload documents, track versions and decide who can read each one." },
+  { id: "users", c: "#efe6d2", label: "Users & Roles", icon: icons.users, cap: "manage_roles", desc: "Change a person's roles. Their cached answers are invalidated immediately." },
+  { id: "security", c: "#efe6d2", label: "Security Center", icon: icons.shield, cap: "review_security", desc: "Audit trail, user risk scores and the models running on this server." },
+  { id: "demo", c: "#efe6d2", label: "Demo Controls", icon: icons.sliders, cap: "demo_controls", desc: "Run the demo scenario: revoke access, simulate an outage, upload a poisoned file." },
 ];
 
 export default function App() {
@@ -49,7 +49,7 @@ export default function App() {
 
   if (!user && screen === "hero") return (
     <>
-      <ShaderBackground dim={0.34} ambient={ambient} />
+      <ShaderBackground dim={0.3} ambient={ambient} />
       {motion}
       <main className="flex min-h-full flex-col items-center justify-center px-6 text-center">
         <h1 className="gradient-text rise font-display font-extrabold leading-[0.95] tracking-[-0.045em]" style={{ fontSize: "clamp(4.2rem, 15vw, 12rem)" }}>VaultRAG</h1>
@@ -74,7 +74,7 @@ export default function App() {
 
   return (
     <div className="min-h-full pb-28 md:pb-12" style={{ ["--accent" as any]: current.c }}>
-      <ShaderBackground dim={0.6} ambient={ambient} />
+      <ShaderBackground dim={0.62} ambient={ambient} />
       {motion}
       <header className="px-4 pt-5 sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
@@ -97,7 +97,7 @@ export default function App() {
           const active = n.id === current.id;
           return (
             <button key={n.id} onClick={() => setTab(n.id)} title={`${n.label} — ${n.desc}`} aria-label={n.label} aria-current={active ? "page" : undefined}
-              style={active ? { background: `linear-gradient(120deg, ${n.c}38, ${n.c}14)`, boxShadow: `inset 0 0 0 1px ${n.c}77, 0 0 22px -6px ${n.c}` } : undefined}
+              style={active ? { background: "linear-gradient(120deg, rgba(239,230,210,0.20), rgba(239,230,210,0.07))", boxShadow: "inset 0 0 0 1px rgba(239,230,210,0.45)" } : undefined}
               className={`flex items-center gap-2 whitespace-nowrap rounded-full px-2.5 py-2.5 text-sm font-medium transition duration-200 sm:px-3.5 ${active ? "text-white" : "text-slate-400 hover:bg-white/10 hover:text-white"}`}>
               <span style={{ color: active ? n.c : undefined }}>{n.icon}</span><span className={active ? "inline" : "hidden lg:inline"}>{n.label}</span>
             </button>

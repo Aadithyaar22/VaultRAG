@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
-/* Liquid glass theme. Fonts degrade to system fonts if the CDN is blocked. */
+/* Monochrome luxe theme: black, white and cream only. Fonts degrade to system fonts if the CDN is blocked. */
 @theme {
-  --color-ink: #050813;
-  --color-panel: #0a1020;
-  --color-panel2: #101a31;
-  --color-line: #1c2a4a;
-  --color-brand: #5eead4;
-  --color-sapphire: #4f8cff;
-  --color-violet: #8b7bff;
+  --color-ink: #070706;
+  --color-panel: #0e0d0b;
+  --color-panel2: #151412;
+  --color-line: #2a2823;
+  --color-cream: #efe6d2;
+  --color-cream-dim: #cfc4aa;
+  --color-brand: #efe6d2;
+  /* warm neutral greys replace Tailwind's blue-tinted slate everywhere */
+  --color-slate-50: #faf8f3; --color-slate-100: #f2eee5; --color-slate-200: #e3ddd0; --color-slate-300: #cdc6b6;
+  --color-slate-400: #a8a192; --color-slate-500: #7f796c; --color-slate-600: #5d584e; --color-slate-700: #433f38;
+  --color-slate-800: #2c2924; --color-slate-900: #191714; --color-slate-950: #0e0d0b;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -16,7 +20,7 @@
 html, body, #root { height: 100%; }
 body {
   background: var(--color-ink);
-  color: #e3e9fb;
+  color: #ece8df;
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.6;
@@ -25,26 +29,27 @@ body {
 }
 h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
 code, pre, kbd { font-family: var(--font-mono); }
-:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
-input[type="checkbox"] { accent-color: var(--color-brand); width: 16px; height: 16px; }
+:focus-visible { outline: 2px solid var(--color-cream); outline-offset: 3px; }
+input[type="checkbox"] { accent-color: var(--color-cream); width: 16px; height: 16px; }
 select { font-size: 0.85rem; }
+::selection { background: rgba(239, 230, 210, 0.3); }
 
 /* Liquid surface: soft, large radius, translucent, lit from above */
 .liquid {
   border-radius: 1.5rem;
-  background: linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025));
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  backdrop-filter: blur(22px) saturate(110%);
+  -webkit-backdrop-filter: blur(22px) saturate(110%);
   border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 24px 60px -28px rgba(0,0,0,0.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 24px 60px -28px rgba(0,0,0,0.8);
 }
-.liquid-flat { border-radius: 1rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-.glow-focus:focus { border-color: rgba(94,234,212,0.7); box-shadow: 0 0 0 4px rgba(94,234,212,0.12); outline: none; }
+.liquid-flat { border-radius: 1rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); }
+.glow-focus:focus { border-color: rgba(239,230,210,0.7); box-shadow: 0 0 0 4px rgba(239,230,210,0.12); outline: none; }
 
-.gradient-text { background: linear-gradient(110deg, #ffffff 5%, #9ff3e3 32%, #9db8ff 62%, #d8a8ff 85%, #ff9fd0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gradient-text { background: linear-gradient(110deg, #ffffff 10%, #f3ecdb 50%, #d9cdb0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-@keyframes bead { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.bead { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; animation: bead 2s ease-in-out infinite; }
+@keyframes bead { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.bead { animation: bead 2.4s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner { width: 14px; height: 14px; border-radius: 9999px; border: 2px solid currentColor; border-right-color: transparent; animation: spin 0.8s linear infinite; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -52,9 +57,9 @@ select { font-size: 0.85rem; }
 @media (prefers-reduced-motion: reduce) { .bead, .spinner, .rise { animation: none; } }
 
 select, input[type="text"], input[type="search"] {
-  border-radius: 9999px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.13);
   padding: 0.5rem 0.95rem; color: inherit; font-size: 0.85rem;
 }
-select option { background: #0a1020; }
-input[type="file"] { font-size: 0.85rem; color: #cbd5e1; }
-input[type="file"]::file-selector-button { margin-right: 0.8rem; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #e3e9fb; border-radius: 9999px; padding: 0.45rem 1rem; cursor: pointer; }
+select option { background: #0e0d0b; }
+input[type="file"] { font-size: 0.85rem; color: #cdc6b6; }
+input[type="file"]::file-selector-button { margin-right: 0.8rem; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #ece8df; border-radius: 9999px; padding: 0.45rem 1rem; cursor: pointer; }

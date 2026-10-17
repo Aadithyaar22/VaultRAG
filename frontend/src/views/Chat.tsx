@@ -49,14 +49,14 @@ export default function Chat({ user, desc }: { user: User; desc: string }) {
       )}
       {turns.map((t, i) => (
         <div key={i} className="grid gap-2">
-          <div className="ml-auto max-w-[85%] rounded-3xl rounded-br-lg border border-sky-300/30 bg-sky-400/15 px-5 py-3 text-[15px] text-white">{t.q}</div>
+          <div className="ml-auto max-w-[85%] rounded-3xl rounded-br-lg border border-white/20 bg-white/10 px-5 py-3 text-[15px] text-white">{t.q}</div>
           <Card>
             {!t.r && !t.err && <p className="text-sm text-slate-400" aria-live="polite">Generating, then validating authorization… (nothing is shown until the gate approves)</p>}
             <ErrorNote msg={t.err || null} />
             {t.r && (
               <>
-                {t.r.status === "denied" && <p className="text-sm text-red-300">Access denied: this response was blocked and discarded ({t.r.reason}).</p>}
-                {t.r.status === "error" && <p className="text-sm text-red-300">{t.r.answer}</p>}
+                {t.r.status === "denied" && <p className="text-sm text-[#efe6d2] font-medium">Access denied: this response was blocked and discarded ({t.r.reason}).</p>}
+                {t.r.status === "error" && <p className="text-sm text-[#efe6d2] font-medium">{t.r.answer}</p>}
                 {(t.r.status === "answered" || t.r.status === "abstained") && <p className="whitespace-pre-wrap text-sm leading-relaxed"><RichText text={t.r.answer} /></p>}
                 {t.r.citations.length > 0 && (
                   <div className="mt-3 grid gap-1">
