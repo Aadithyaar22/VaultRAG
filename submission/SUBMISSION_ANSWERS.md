@@ -40,7 +40,7 @@ Upload `submission/VaultRAG_pitch_deck.pdf` (9 slides, ~330 KB). Fallback: publi
 
 ## GitHub link (must be public)
 
-https://github.com/Aadithyaar22/vaultrag-ibmz-datathon-2026 — repo root contains README, `.env.example`, sample data, tests. Public, pushed.
+https://github.com/Aadithyaar22/VaultRAG — repo root contains README, `.env.example`, sample data, tests. Public, pushed.
 
 ## Video link (YouTube/Vimeo, ≤3 min, MP4 720p/1080p)
 
@@ -54,4 +54,4 @@ Model used via API: Groq-hosted `openai/gpt-oss-120b` (open-weight model by Open
 
 ## Other document (architecture diagram)
 
-Link: https://github.com/Aadithyaar22/vaultrag-ibmz-datathon-2026/blob/master/submission/architecture.png (also https://github.com/Aadithyaar22/vaultrag-ibmz-datathon-2026/blob/master/submission/architecture.svg) (also slide 4 of the deck). Optionally `docs/BENCHMARK.md` and `docs/BENCHMARK_s390x.md`.
+Link: https://github.com/Aadithyaar22/VaultRAG/blob/master/submission/architecture.png (also https://github.com/Aadithyaar22/VaultRAG/blob/master/submission/architecture.svg) (also slide 4 of the deck). Optionally `docs/BENCHMARK.md` and `docs/BENCHMARK_s390x.md`.
