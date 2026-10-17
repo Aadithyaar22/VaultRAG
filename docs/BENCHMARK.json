@@ -1,0 +1,53 @@
+{
+  "conventional": {
+    "unauth_probes": 23,
+    "unauth_disclosures": 23,
+    "revoke_cache_probes": 2,
+    "revoke_cache_leaks": 2,
+    "revocation_enforcement_ms_p50": 0.02,
+    "race_probes": 2,
+    "race_leaks": 2,
+    "legit_total": 10,
+    "legit_correct": 10,
+    "false_refusals": 0,
+    "cache_correct_after_replace": false,
+    "cold_p50": 0.17,
+    "cold_p95": 0.21,
+    "warm_p50": 0.01,
+    "warm_p95": 0.02
+  },
+  "filtered": {
+    "unauth_probes": 23,
+    "unauth_disclosures": 0,
+    "revoke_cache_probes": 2,
+    "revoke_cache_leaks": 2,
+    "revocation_enforcement_ms_p50": 0.02,
+    "race_probes": 2,
+    "race_leaks": 2,
+    "legit_total": 10,
+    "legit_correct": 10,
+    "false_refusals": 0,
+    "cache_correct_after_replace": false,
+    "cold_p50": 0.11,
+    "cold_p95": 0.16,
+    "warm_p50": 0.01,
+    "warm_p95": 0.01
+  },
+  "vaultrag": {
+    "unauth_probes": 23,
+    "unauth_disclosures": 0,
+    "revoke_cache_probes": 2,
+    "revoke_cache_leaks": 0,
+    "revocation_enforcement_ms_p50": 0.13,
+    "race_probes": 2,
+    "race_leaks": 0,
+    "legit_total": 10,
+    "legit_correct": 10,
+    "false_refusals": 0,
+    "cache_correct_after_replace": true,
+    "cold_p50": 0.17,
+    "cold_p95": 0.21,
+    "warm_p50": 0.05,
+    "warm_p95": 0.06
+  }
+}
