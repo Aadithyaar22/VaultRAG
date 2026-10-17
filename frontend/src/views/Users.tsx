@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Badge, Card, ErrorNote } from "../components/ui";
+import { Badge, Card, ErrorNote, PageHeader } from "../components/ui";
 
 const ROLES = ["employee", "hr", "finance", "legal", "administrator"];
 
-export default function Users() {
+export default function Users({ desc }: { desc: string }) {
   const [users, setUsers] = useState<any[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const load = () => api("/api/admin/users").then(setUsers).catch(e => setErr(e.message));
@@ -15,9 +15,9 @@ export default function Users() {
     try { await api(`/api/admin/users/${u.id}/roles`, { method: "PUT", body: { roles } }); load(); } catch (e: any) { setErr(e.message); }
   }
   return (
-    <div className="mx-auto grid max-w-4xl gap-3">
-      <h1 className="text-xl font-semibold text-white">Users &amp; Roles</h1>
-      <p className="text-sm text-slate-400">Changing roles bumps the user's authorization version and invalidates their cached answers. The <b>administrator</b> role grants management capabilities, <i>not</i> document access.</p>
+    <div className="mx-auto grid max-w-4xl gap-5">
+      <PageHeader title="Users & Roles" desc={desc} />
+      <p className="-mt-4 max-w-2xl text-sm text-slate-400">The <b className="text-slate-200">administrator</b> role grants management capabilities, not access to document contents.</p>
       <ErrorNote msg={err} />
       {users.map(u => (
         <Card key={u.id} title={<span>{u.display_name} <span className="text-xs text-slate-500">@{u.username}</span></span>} right={<Badge tone="mute">authz v{u.authz_version}</Badge>}>

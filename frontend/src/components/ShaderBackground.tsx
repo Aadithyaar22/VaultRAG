@@ -64,7 +64,7 @@ export default function ShaderBackground({ dim = 0.72 }: { dim?: number }) {
     const pos = gl.getAttribLocation(prog, "a_position");
     gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
     const uT = gl.getUniformLocation(prog, "u_time"), uR = gl.getUniformLocation(prog, "u_resolution"), uM = gl.getUniformLocation(prog, "u_mouse");
-    const SCALE = 0.5; // fog is soft: render at half resolution
+    const SCALE = 0.3; // fog is soft: render at ~third resolution (CSS blur smooths it into a liquid flow)
     const size = () => { canvas.width = Math.max(2, Math.floor(canvas.clientWidth * SCALE)); canvas.height = Math.max(2, Math.floor(canvas.clientHeight * SCALE)); };
     size();
     const mouse = { x: 0, y: 0 };
@@ -84,7 +84,7 @@ export default function ShaderBackground({ dim = 0.72 }: { dim?: number }) {
   }, []);
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-      <canvas ref={ref} className="block h-full w-full" />
+      <canvas ref={ref} className="block h-full w-full" style={{ filter: "blur(22px) saturate(115%)", transform: "scale(1.12)" }} />
       <div className="absolute inset-0" style={{ background: `rgba(4,7,17,${dim})` }} />
     </div>
   );

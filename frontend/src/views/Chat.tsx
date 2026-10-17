@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { api, ChatResult, User } from "../api";
-import { Badge, Button, Card, ErrorNote, RichText, statusTone } from "../components/ui";
+import { Badge, Button, Card, ErrorNote, PageHeader, RichText, SplitButton, statusTone } from "../components/ui";
 
 type Turn = { q: string; r?: ChatResult; err?: string };
 const SUGGESTIONS = ["What is the Level 5 salary band?", "How many weeks of paid parental leave do primary caregivers receive?", "How many days of annual leave do employees get?", "What is the Q3 marketing budget?"];
@@ -9,7 +9,7 @@ const SecurityStrip = ({ r }: { r: ChatResult }) => {
   const label = { answered: "Released by security gate", abstained: "Abstained", denied: "Blocked — failed closed", error: "Error" }[r.status];
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" aria-label="Security status">
-      <Badge tone={statusTone(r.status)}>🛡 {label}</Badge>
+      <Badge tone={statusTone(r.status)}>{label}</Badge>
       {r.cache !== "miss" && <Badge tone="info">cache: {r.cache.replace("_", " ")}</Badge>}
       {r.reason && <Badge tone="warn">reason: {r.reason}</Badge>}
       {r.security?.quarantined > 0 && <Badge tone="warn">{r.security.quarantined} chunk(s) quarantined (injection)</Badge>}
@@ -21,7 +21,7 @@ const SecurityStrip = ({ r }: { r: ChatResult }) => {
   );
 };
 
-export default function Chat({ user }: { user: User }) {
+export default function Chat({ user, desc }: { user: User; desc: string }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
@@ -40,11 +40,8 @@ export default function Chat({ user }: { user: User }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <div>
-        <h1 className="text-xl font-semibold text-white">Secure AI Chat</h1>
-        <p className="text-sm text-slate-400">Answers use only documents <b>{user.display_name}</b> may read, and are re-validated by the Revocation-Safe Evidence Gate before release.</p>
-      </div>
+    <div className="mx-auto flex max-w-3xl flex-col gap-5">
+      <PageHeader title="Secure Chat" desc={`${desc} Signed in as ${user.display_name}.`} />
       {turns.length === 0 && (
         <Card title="Try a question">
           <div className="flex flex-wrap gap-2">{SUGGESTIONS.map(s => <Button key={s} variant="ghost" onClick={() => ask(s)}>{s}</Button>)}</div>
@@ -52,7 +49,7 @@ export default function Chat({ user }: { user: User }) {
       )}
       {turns.map((t, i) => (
         <div key={i} className="grid gap-2">
-          <div className="ml-auto max-w-[85%] rounded border border-sapphire/40 bg-sapphire/15 px-3 py-2 text-sm text-white">{t.q}</div>
+          <div className="ml-auto max-w-[85%] rounded-3xl rounded-br-lg border border-sky-300/30 bg-sky-400/15 px-5 py-3 text-[15px] text-white">{t.q}</div>
           <Card>
             {!t.r && !t.err && <p className="text-sm text-slate-400" aria-live="polite">Generating, then validating authorization… (nothing is shown until the gate approves)</p>}
             <ErrorNote msg={t.err || null} />
@@ -78,10 +75,12 @@ export default function Chat({ user }: { user: User }) {
         </div>
       ))}
       <div ref={end} />
-      <form className="sticky bottom-2 flex gap-2" onSubmit={e => { e.preventDefault(); ask(q); }}>
+      <form className="sticky bottom-24 flex gap-3 md:bottom-4" onSubmit={e => { e.preventDefault(); ask(q); }}>
         <input aria-label="Question" value={q} onChange={e => setQ(e.target.value)} maxLength={2000} placeholder="Ask about your documents…"
-          className="glow-focus flex-1 rounded border border-panel2 bg-ink px-3 py-2.5 font-mono text-sm placeholder:text-slate-500 focus:border-brand" />
-        <Button type="submit" disabled={busy || q.trim().length < 3}>{busy ? "…" : "Ask"}</Button>
+          className="glow-focus flex-1 rounded-full border border-white/12 bg-black/30 px-5 py-3 text-sm placeholder:text-slate-500" />
+        <SplitButton label="Ask" busy={busy} disabled={q.trim().length < 3 && !busy} onClick={() => ask(q)} menuLabel="More chat actions"
+          items={[{ label: "Clear conversation", hint: "Remove this thread from the screen", onClick: () => setTurns([]) },
+                  { label: "Copy last audit ID", hint: "To find the decision in the Security Center", onClick: () => { const r = [...turns].reverse().find(t => t.r)?.r; if (r) navigator.clipboard?.writeText(r.request_id); } }]} />
       </form>
     </div>
   );

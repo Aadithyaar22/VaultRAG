@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { api, AuditEvent } from "../api";
-import { Badge, Button, Card, statusTone } from "../components/ui";
+import { Badge, Card, PageHeader, SplitButton, statusTone } from "../components/ui";
 
 const FILTERS = ["", "response_blocked", "revocation_detected_before_release", "stale_cache_rejected", "prompt_injection_quarantined", "prompt_injection_detected_on_upload", "permission_changed", "cache_invalidated", "response_released"];
 
-export default function Security() {
+export default function Security({ desc }: { desc: string }) {
   const [ev, setEv] = useState<AuditEvent[]>([]);
   const [f, setF] = useState("");
   const [v, setV] = useState<any>(null);
@@ -22,11 +22,13 @@ export default function Security() {
   const savePol = (p: any) => api("/api/security/pii-policy", { method: "PUT", body: p }).then(setPol).catch(e => alert(e.message));
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-4">
-      <h1 className="text-xl font-semibold text-white">Security Center</h1>
+    <div className="mx-auto grid max-w-5xl gap-5">
+      <PageHeader title="Security Center" desc={desc} />
       <div className="grid gap-4 md:grid-cols-2">
         <Card title="Audit chain" right={v && <Badge tone={v.valid ? "ok" : "bad"}>{v.valid ? "valid" : `broken @ seq ${v.first_bad_seq}`}</Badge>}>
-          <Button variant="ghost" onClick={() => api("/api/security/audit/verify").then(setV)}>Verify hash chain</Button>
+          <SplitButton variant="ghost" label="Verify hash chain" onClick={() => api("/api/security/audit/verify").then(setV)} menuLabel="More audit actions"
+            items={[{ label: "Refresh events", hint: "Reload the list below now", onClick: () => load() },
+                    { label: "Export events as JSON", hint: "Download what is currently listed", onClick: () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(ev, null, 2)], { type: "application/json" })); a.download = "vaultrag-audit-events.json"; a.click(); } }]} />
           {v && <p className="mt-2 text-xs text-slate-400">{v.entries} entries · head {v.head.slice(0, 20)}…</p>}
         </Card>
         {pol && (
@@ -41,7 +43,7 @@ export default function Security() {
         )}
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <Card title="🤖 User risk (IsolationForest, last 10 min)" right={<Badge tone="info">anomaly detection</Badge>}>
+        <Card title="User risk · IsolationForest, last 10 min" right={<Badge tone="info">anomaly detection</Badge>}>
           {!risk || risk.users.length === 0 ? <p className="text-sm text-slate-400">No recent activity.</p> : (
             <ul className="grid gap-2 text-sm">{risk.users.map((u: any) => (
               <li key={u.user_id} className="flex flex-wrap items-center gap-2">

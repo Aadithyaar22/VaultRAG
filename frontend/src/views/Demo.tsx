@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, ChatResult } from "../api";
-import { Badge, Button, Card, ErrorNote, RichText, statusTone } from "../components/ui";
+import { Badge, Button, Card, ErrorNote, PageHeader, RichText, SplitButton, statusTone } from "../components/ui";
 
 const USERS = ["alice", "hannah", "frank", "leo", "maya", "adam"];
 const Q = "How many weeks of paid parental leave do primary caregivers receive?";
 
-export default function Demo() {
+export default function Demo({ desc }: { desc: string }) {
   const [who, setWho] = useState("hannah");
   const [q, setQ] = useState(Q);
   const [out, setOut] = useState<{ title: string; data: any } | null>(null);
@@ -20,15 +20,17 @@ export default function Demo() {
   const r: ChatResult | undefined = out?.data?.status ? out.data : out?.data?.result;
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-4">
-      <div className="flex items-center gap-2"><h1 className="text-xl font-semibold text-white">Administrator Demo Controls</h1><Badge tone="warn">DEMO_MODE only</Badge></div>
-      <p className="text-sm text-slate-400">Drive the mandatory scenario without editing the database. Authorization is always evaluated for the <b>selected user</b>, and every action is audited.</p>
+    <div className="mx-auto grid max-w-5xl gap-5">
+      <PageHeader title="Demo Controls" desc={desc} right={<Badge tone="warn">Demo mode only</Badge>} />
       <ErrorNote msg={err} />
       <Card title="1 · Ask as a user">
         <div className="flex flex-wrap gap-2">
           <select aria-label="Ask as" className="rounded border border-line bg-ink px-2 py-1.5 text-sm" value={who} onChange={e => setWho(e.target.value)}>{USERS.map(u => <option key={u}>{u}</option>)}</select>
           <input aria-label="Question" className="min-w-64 flex-1 rounded border border-line bg-ink px-3 py-1.5 text-sm" value={q} onChange={e => setQ(e.target.value)} />
-          <Button onClick={() => act(`Ask as ${who}`, "/api/admin/demo/ask-as", { username: who, question: q })}>Ask</Button>
+          <SplitButton label="Ask" onClick={() => act(`Ask as ${who}`, "/api/admin/demo/ask-as", { username: who, question: q })} menuLabel="More scenarios"
+            items={[{ label: `Revoke during generation as ${who}`, hint: "Answer is generated, then access is revoked before release", onClick: () => act("Revoke during generation", "/api/admin/demo/revoke-during-generation", { username: who, question: q }) },
+                    { label: `Simulate probing as ${who}`, hint: "12 restricted questions, to raise the risk score", onClick: () => act("Simulate probing", "/api/admin/demo/simulate-probing", { username: who, n: 12 }) },
+                    { label: "Clear cache", hint: "Drop every cached answer", onClick: () => act("Clear cache", "/api/admin/demo/clear-cache") }]} />
         </div>
         <p className="mt-2 text-xs text-slate-500">Run as <b>hannah</b> → cited answer &amp; cached. Run as <b>alice</b> → abstains (no HR evidence). Then revoke below and re-run as hannah.</p>
       </Card>

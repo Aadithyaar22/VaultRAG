@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { api, AuditEvent, User } from "../api";
-import { Badge, Card, Stat, statusTone } from "../components/ui";
+import { Badge, Card, PageHeader, Stat, statusTone } from "../components/ui";
 
-export default function Dashboard({ user }: { user: User }) {
+export default function Dashboard({ user, desc }: { user: User; desc: string }) {
   const [s, setS] = useState<any>(null);
   const [ev, setEv] = useState<AuditEvent[]>([]);
   const reviewer = user.capabilities.includes("review_security");
@@ -17,9 +17,8 @@ export default function Dashboard({ user }: { user: User }) {
 
   if (!s) return <p className="text-slate-400">Loading…</p>;
   return (
-    <div className="mx-auto grid max-w-5xl gap-4">
-      <div className="flex flex-wrap items-center gap-2"><h1 className="text-xl font-semibold text-white">Dashboard</h1>
-        <Badge tone="ok">live measurements</Badge><Badge tone="mute">{s.scope === "all_users" ? "all users" : "your activity only"}</Badge></div>
+    <div className="mx-auto grid max-w-5xl gap-5">
+      <PageHeader title="Dashboard" desc={desc} right={<div className="flex gap-2"><Badge tone="ok">live measurements</Badge><Badge tone="mute">{s.scope === "all_users" ? "all users" : "your activity only"}</Badge></div>} />
       <p className="text-xs text-slate-500">{s.source}</p>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Documents you can read" value={s.documents} />
