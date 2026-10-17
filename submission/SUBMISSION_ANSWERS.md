@@ -2,7 +2,7 @@
 
 Deadline shown on the form: **18/10/2026 10:00 PM IST**. Fill the `[...]` placeholders, then confirm every link opens in a private window without requesting access.
 
-**Project title (required format):** `[Team Name_IBM Z Datathon 2026 Project]`
+**Project title (required format):** `Hacktivists_IBM Z Datathon 2026 Project`
 
 ## Challenge
 
