@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 from .. import auth, db
 from ..services import audit, authz, documents, ml
-from ..services.extract import UnsupportedFile, extract_text
+from ..services.extract import UnsupportedFile, extract_with_report
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 MAX_BYTES = 10 * 1024 * 1024
@@ -46,7 +46,7 @@ async def suggest(file: UploadFile = File(...), user=Depends(auth.require_capabi
     if len(data) > MAX_BYTES:
         raise HTTPException(413, "file too large (10 MB max)")
     try:
-        pred = ml.classify_document(extract_text(file.filename or "x.txt", data))
+        pred = ml.classify_document(extract_with_report(file.filename or "x.txt", data)[0])
     except UnsupportedFile as e:
         raise HTTPException(415, str(e))
     return {"available": pred is not None, "prediction": pred}
@@ -66,7 +66,7 @@ async def upload(file: UploadFile = File(...), title: str = Form(...), sensitivi
         raise HTTPException(415, str(e))
     except ValueError as e:
         raise HTTPException(422, str(e))
-    warn = ml.overexposure(ml.classify_document(extract_text(file.filename or "x.txt", data)), roles, sensitivity)
+    warn = ml.overexposure(ml.classify_document(extract_with_report(file.filename or "x.txt", data)[0]), roles, sensitivity)
     if warn:
         audit.log("acl_overexposure_warning", user_id=user.id, outcome="flagged", doc_id=meta["id"],
                   warning=warn["warning"], predicted=warn["prediction"]["department"])

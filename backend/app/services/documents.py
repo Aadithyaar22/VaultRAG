@@ -1,12 +1,13 @@
 """Document + permission lifecycle. Every mutation bumps versions and invalidates dependent cache
 entries inside the same transaction, then writes an audit record."""
 import json
+import re
 
 from .. import db
 from ..util import new_id, now, sha256
 from . import audit, injection, pii, rseg
 from .embeddings import embed
-from .extract import chunk_text, extract_text
+from .extract import chunk_text, extract_with_report, readable_chunks
 
 ROLES = ["employee", "hr", "finance", "legal", "administrator"]
 SENSITIVITIES = ["public", "internal", "confidential", "restricted"]
@@ -23,10 +24,24 @@ def _validate(sensitivity: str, roles: list[str]) -> None:
 def ingest(*, title: str, sensitivity: str, filename: str, data: bytes, allowed_roles: list[str],
            actor_id: str | None, doc_id: str | None = None) -> dict:
     _validate(sensitivity, allowed_roles)
-    text = extract_text(filename, data)
-    pieces = chunk_text(text)
+    text, report = extract_with_report(filename, data)
+    pieces, dropped = readable_chunks(chunk_text(text))
     if not pieces:
-        raise ValueError("document has no extractable text")
+        raise ValueError("No readable text could be extracted (scanned images or unusual fonts?). Upload a text-based PDF, DOCX or TXT.")
+    if dropped and dropped > len(pieces):
+        raise ValueError(f"Most of this file's text is unreadable ({dropped} of {dropped + len(pieces)} sections). Upload a text-based version.")
+    # Sentence-level neutralisation: drop only the instruction-like sentences, keep the legitimate text around them.
+    # A chunk that is still quarantine-worthy afterwards (e.g. entirely injected) stays quarantined as a whole.
+    orig_scans = [injection.scan(p) for p in pieces]
+    removed_per_chunk: dict[int, int] = {}
+    for i, (p, sc) in enumerate(zip(pieces, orig_scans)):
+        if not sc["quarantine"]:
+            continue
+        sents = re.split(r"(?<=[.!?])\s+|\n+", p)
+        kept = [x for x in sents if x.strip() and not injection.scan(x)["quarantine"]]
+        if len(sents) > len(kept) and sum(len(x) for x in kept) >= 60:
+            removed_per_chunk[i] = len([x for x in sents if x.strip()]) - len(kept)
+            pieces[i] = " ".join(kept) + " [instruction-like text removed]"
     vectors = embed(pieces)
     scans = [injection.scan(p) for p in pieces]
     pii_total = sum(sum(pii.detect(p).values()) for p in pieces)
@@ -39,14 +54,14 @@ def ingest(*, title: str, sensitivity: str, filename: str, data: bytes, allowed_
             version = existing["version"] + 1
             c.execute("UPDATE documents SET title=?, sensitivity=?, filename=?, version=?, status='active', "
                       "injection_flagged=?, pii_count=?, updated_at=? WHERE id=?",
-                      (title, sensitivity, filename, version, int(any(s["flagged"] for s in scans)),
+                      (title, sensitivity, filename, version, int(any(s["flagged"] for s in orig_scans)),
                        pii_total, ts, doc_id))
             c.execute("DELETE FROM chunks WHERE doc_id=?", (doc_id,))
         else:
             doc_id, version = new_id("doc"), 1
             c.execute("INSERT INTO documents(id,title,sensitivity,filename,version,acl_version,injection_flagged,"
                       "pii_count,created_by,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                      (doc_id, title, sensitivity, filename, 1, 1, int(any(s["flagged"] for s in scans)),
+                      (doc_id, title, sensitivity, filename, 1, 1, int(any(s["flagged"] for s in orig_scans)),
                        pii_total, actor_id, ts, ts))
         _set_acl_rows(c, doc_id, allowed_roles, None)
         if existing:  # ACL version also moves: the evidence behind any cached answer has changed
@@ -59,15 +74,18 @@ def ingest(*, title: str, sensitivity: str, filename: str, data: bytes, allowed_
         c.execute("INSERT OR REPLACE INTO document_versions VALUES(?,?,?,?,?,?)",
                   (doc_id, version, sha256(text), filename, len(pieces), ts))
         n_inv = rseg.invalidate_for_doc(doc_id, "document_replaced" if existing else "document_created")
-        flagged = [i for i, s in enumerate(scans) if s["flagged"]]
+        flagged = [i for i, s in enumerate(orig_scans) if s["flagged"]]
         audit.log("document_replaced" if existing else "document_uploaded", user_id=actor_id, outcome="ok",
-                  doc_id=doc_id, version=version, chunks=len(pieces), roles=sorted(allowed_roles),
+                  doc_id=doc_id, version=version, chunks=len(pieces), dropped_unreadable=dropped, extraction=report.get("method"), roles=sorted(allowed_roles),
                   sensitivity=sensitivity, cache_invalidated=n_inv, pii_detected=pii_total)
         if flagged:
             audit.log("prompt_injection_detected_on_upload", user_id=actor_id, outcome="flagged", doc_id=doc_id,
-                      chunks=flagged, rules=sorted({r for s in scans for r in s["rules"]}),
+                      chunks=flagged, rules=sorted({r for s in orig_scans for r in s["rules"]}), sentences_removed=removed_per_chunk,
                       quarantined=[i for i, s in enumerate(scans) if s["quarantine"]])
-    return get_meta(doc_id)
+    meta = get_meta(doc_id)
+    meta["extraction"] = {"method": report.get("method"), "quality": None if report.get("quality") is None else round(report["quality"], 2),
+                          "unreadable_sections_dropped": dropped}
+    return meta
 
 
 def _set_acl_rows(c, doc_id: str, roles: list[str] | None, denied: list[str] | None) -> None:

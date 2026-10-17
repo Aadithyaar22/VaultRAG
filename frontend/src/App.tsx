@@ -60,8 +60,14 @@ export default function App() {
       <ShaderBackground dim={0.3} ambient={ambient} />
       {motion}
       <main className="flex min-h-full flex-col items-center justify-center px-6 text-center">
-        <h1 className="gradient-text rise font-display font-extrabold leading-[0.95] tracking-[-0.045em]" style={{ fontSize: "clamp(4.2rem, 15vw, 12rem)" }}>VaultRAG</h1>
-        <Button className="rise mt-12 !px-9 !py-3.5 !text-base" style={{ animationDelay: "0.25s" }} onClick={() => setScreen("signin")}>
+        <h1 className="hero-title" aria-label="VaultRAG">
+          <span aria-hidden>
+            {"Vault".split("").map((c, i) => <span key={i} className="ch vault" style={{ ["--i" as any]: i }}>{c}</span>)}
+            {"RAG".split("").map((c, i) => <span key={i} className="ch rag" style={{ ["--i" as any]: i + 5 }}>{c}</span>)}
+          </span>
+        </h1>
+        <div className="hero-rule" aria-hidden />
+        <Button className="rise mt-12 !px-9 !py-3.5 !text-base" style={{ animationDelay: "1.5s" }} onClick={() => setScreen("signin")}>
           Sign in {icons.arrow}
         </Button>
       </main>

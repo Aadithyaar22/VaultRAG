@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     embedding_api_key: str = ""
     embedding_model: str = ""
 
-    retrieval_top_k: int = 4
+    retrieval_top_k: int = 6
     retrieval_min_score: float = 0.08
     rseg_max_regenerations: int = 1
     cache_enabled: bool = True

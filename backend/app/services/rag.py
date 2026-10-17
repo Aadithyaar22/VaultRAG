@@ -54,11 +54,17 @@ def _build_evidence(candidates: list[dict], allowed: dict[str, dict]) -> tuple[l
     return chunks, list(deps.values())
 
 
+def _has_citation(text: str, n_ev: int) -> bool:
+    import re
+    norm = re.sub(r"[【\[]\s*(\d+(?:\s*[,;]\s*\d+)*)\s*[^\d\]】]*[】\]]", lambda m: "".join(f"[{n}]" for n in re.findall(r"\d+", m.group(1))), text)
+    return any(1 <= int(m) <= n_ev for m in re.findall(r"\[(\d+)\]", norm))
+
+
 def _finalize(question, user, chunks, raw) -> tuple[str, list[dict], dict]:
     """Deterministic post-processing: citation validation, canary check, PII policy."""
     import re
     # normalise citation styles models emit: 【1】, [1, 2], (1) -> [1][2]
-    raw = re.sub(r"[【\[]\s*(\d+(?:\s*[,;]\s*\d+)*)\s*[】\]]",
+    raw = re.sub(r"[【\[]\s*(\d+(?:\s*[,;]\s*\d+)*)\s*[^\d\]】]*[】\]]",
                  lambda m: "".join(f"[{n}]" for n in re.findall(r"\d+", m.group(1))), raw)
     n_ev = len(chunks)
     cited = sorted({int(m) for m in re.findall(r"\[(\d+)\]", raw) if 1 <= int(m) <= n_ev})
@@ -127,6 +133,8 @@ def run(user: dict, question: str, mode: str = "vaultrag",
             if "after_retrieval" in hooks:
                 hooks["after_retrieval"]({"user": user, "chunks": chunks, "attempt": attempts})
             res = llm.generate(question, chunks)                       # 3. generate (never streamed)
+            if not res.text.strip().startswith("INSUFFICIENT_EVIDENCE") and res.generative and not _has_citation(res.text, len(chunks)):
+                res = llm.generate(question + "\n\nReminder: cite the evidence you used as [1], [2] ... matching the evidence numbers.", chunks)
             if "before_gate" in hooks:
                 hooks["before_gate"]({"user": user, "chunks": chunks, "attempt": attempts})
             ok, reasons = rseg.validate_release(uid, snap["authz_version"], deps)   # 4. final gate

@@ -62,15 +62,18 @@ for tests/benchmarks/no-network demos; the UI labels it as such.
 
 ## On-server AI/ML (scikit-learn, trained at startup on the machine that runs the app — LinuxONE s390x)
 - **Document classifier** (TF-IDF + logistic regression): predicts department + sensitivity, pre-fills the upload ACL, and warns on *over-exposure* (e.g. HR-looking text shared with `employee`).
-- **Injection classifier** (word+char TF-IDF): ensemble with the regex rules. Held-out (16 malicious / 14 benign never used in training): ML alone 15/16 recall, 1/14 false positives; ensemble 16/16, 1/14.
+- **Injection classifier** (word+char TF-IDF) + regex rules: a *supplementary* signal. On an independent public benchmark (deepset/prompt-injections, held-out test split) the shipped ensemble catches **20% overall / 32% English / 0% German with 0 false positives**; on our own hand-written cases it scores 16/16, which is optimistic. Injected sentences are removed (not the whole chunk) before the model sees them. See `docs/REAL_DOCUMENT_TEST.md`.
 - **Behavioural anomaly detection** (IsolationForest over per-user audit-log windows): risk score in the Security Center; "Simulate probing" demo control.
 - Trained from **synthetic generated data** (no pickled models; not portable across sklearn/endianness). Demonstrations, not production-grade; documented in `docs/` and visible in Security Center → "Models running on this server".
 - IBM's mandatory Jupyter AI/ML lab was completed on our instance: see `docs/IBM_LAB_EVIDENCE.md`.
 
+## Tested on real documents
+Six real public documents (4 PDFs, 1 DOCX with a table, 1 TXT) were uploaded to the live LinuxONE app and tested as every role with the real model: **15/15** authorized questions answered correctly with the right citation, **21/21** unauthorized attempts released nothing. The run exposed eight real bugs (DOCX tables, garbled PDF fonts, over-flagging, weak retrieval, citation handling, rate limits, over-quarantining) — all fixed with regression tests. Full method, results and remaining limitations: **`docs/REAL_DOCUMENT_TEST.md`**.
+
 ## Tests & evaluation
 
 ```bash
-cd backend && .venv/bin/python -m pytest -q          # 32 tests: RBAC, revocation, cache, versions, races,
+cd backend && .venv/bin/python -m pytest -q          # 42 tests: RBAC, revocation, cache, versions, races,
                                                      # authz outage, injection, PII, audit, metadata leakage
 .venv/bin/python -m scripts.benchmark --out ../docs/BENCHMARK.md
 ```
@@ -97,15 +100,12 @@ final gate, regenerate-or-deny, fail closed), injection quarantine, PII redact/b
 not a distributed failure; "demo ask-as" lets the demo admin run queries as another synthetic user.
 **Incomplete:** SQLite + in-process lock (single node; no multi-process/DB-replication story); no streaming (by design);
 vector search is a linear scan over SQLite (fine for demo scale; ChromaDB/other store is not wired in);
-PDF/DOCX extraction untested on complex layouts; no rate limiting, MFA, or SSO; tokens are bearer HMAC tokens with no revocation list
+scanned (image-only) PDFs are rejected — no OCR; no rate limiting, MFA, or SSO; tokens are bearer HMAC tokens with no revocation list
 (roles/active flag are re-read from the DB each request, so disabling/role changes take effect immediately).
 **Unverified:** behaviour with a real hosted LLM beyond the OpenAI-compatible request shape; deployment on LinuxONE/s390x;
 prompt-injection detector quality beyond the small hand-written suite below; the benchmark is small and the baselines
 are our own re-implementations. No claim of novelty has been made — no literature/prior-art review has been done.
 
-**Prompt-injection detector (regex heuristics):** on the 16 malicious / 14 benign hand-written samples in
-`backend/tests/injection_cases.py` it flags 16/16 and 0/14 **after two rules were generalised once we saw two misses** —
-so that number is optimistic; a held-out set is needed. Heuristics miss paraphrase/obfuscation; the real defences are
-architectural (authorization before the model, untrusted-evidence framing, no tools, deterministic release gate).
+**Prompt-injection detector:** weak on real-world attacks (see above and `docs/REAL_DOCUMENT_TEST.md`): it misses most of the public benchmark and all of the German samples. The real defences are architectural — authorization before the model, evidence framed as untrusted data, no tools, deterministic release gate — and in our live test the model did not follow an undetected German injection that reached its context. A multilingual/neural detector is future work.
 
 Never use real personal data; all seeded data is synthetic. Never commit `.env`.

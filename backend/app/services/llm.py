@@ -1,6 +1,7 @@
 """Model-provider abstraction. The LLM only ever sees (a) fixed system instructions, (b) the user's
 question, (c) evidence that was already authorised + injection-screened. It has no tools."""
 import re
+import time
 from dataclasses import dataclass
 
 import httpx
@@ -60,14 +61,27 @@ def generate(question: str, evidence: list[dict]) -> LLMResult:
     if s.llm_provider == "openai_compatible":
         if not s.llm_api_key:
             raise LLMNotConfigured("LLM_API_KEY is not set (or set LLM_PROVIDER=extractive for offline demo mode)")
-        try:
-            r = httpx.post(s.llm_base_url.rstrip("/") + "/chat/completions",
-                           headers={"Authorization": f"Bearer {s.llm_api_key}"},
-                           json={"model": s.llm_model, "temperature": 0,
-                                 "messages": build_messages(question, evidence)},
-                           timeout=s.llm_timeout_seconds)
-            r.raise_for_status()
-            return LLMResult(r.json()["choices"][0]["message"]["content"].strip(), s.llm_model, True)
-        except httpx.HTTPError as e:
-            raise LLMError(f"model request failed: {type(e).__name__}") from None
+        last = "no response"
+        for attempt in range(4):
+            try:
+                r = httpx.post(s.llm_base_url.rstrip("/") + "/chat/completions",
+                               headers={"Authorization": f"Bearer {s.llm_api_key}"},
+                               json={"model": s.llm_model, "temperature": 0, "messages": build_messages(question, evidence)},
+                               timeout=s.llm_timeout_seconds)
+            except httpx.HTTPError as e:
+                last = type(e).__name__
+            else:
+                if r.status_code == 200:
+                    return LLMResult(r.json()["choices"][0]["message"]["content"].strip(), s.llm_model, True)
+                last = f"HTTP {r.status_code}"
+                if r.status_code not in (408, 409, 425, 429, 500, 502, 503, 504):
+                    break                                   # client error (bad key/model): retrying will not help
+                try:
+                    wait = min(8.0, float(r.headers.get("retry-after", 0)))
+                except ValueError:
+                    wait = 0.0
+                time.sleep(wait or min(6.0, 1.0 * 2 ** attempt))
+            if attempt == 3:
+                break
+        raise LLMError(f"model request failed after retries ({last})")
     raise LLMNotConfigured("no model provider configured (LLM_PROVIDER)")

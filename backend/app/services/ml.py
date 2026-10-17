@@ -61,7 +61,7 @@ def train() -> dict:
     with _lock:
         Xd, yd = ml_data.dept_dataset(); dept = _text_clf(8.0).fit(Xd, yd)
         Xs, ys = ml_data.sens_dataset(); sens = _text_clf(8.0).fit(Xs, ys)
-        Xi, yi = ml_data.injection_dataset(); inj = _text_clf(6.0, char=True).fit(Xi, yi)
+        Xi, yi = ml_data.injection_dataset_v2(); inj = _text_clf(6.0, char=True).fit(Xi, yi)
         W = _normal_windows(); forest = IsolationForest(n_estimators=200, random_state=0).fit(W)
         _models.update(dept=dept, sens=sens, inj=inj, forest=forest, ref=np.sort(forest.score_samples(W)))
         _meta.clear()
@@ -175,9 +175,9 @@ def status() -> dict:
             dok += p["department"] == ml_eval.SEED_DEPT[k]; sok += p["sensitivity"] == sens
         _eval_cache.update(
             injection={"regex_only": rates(lambda t: injection.scan_regex(t)["flagged"]),
-                       "ml_only": rates(lambda t: injection_prob(t) >= 0.5),
+                       "ml_only": rates(lambda t: injection_prob(t) >= injection.ML_FLAG),
                        "ensemble": rates(lambda t: injection.scan(t)["flagged"]),
-                       "note": "ML trained only on generated data; the regex rules were tuned after seeing these samples, so regex numbers are optimistic"},
+                       "note": "Own 30-sample suite: optimistic (we wrote it and tuned regex rules after seeing misses). On the independent deepset benchmark test split the shipped ensemble caught 20% overall / 32% English / 0% German with 0 false positives (docs/REAL_DOCUMENT_TEST.md)."},
             document_classifier={"department_correct": f"{dok}/{len(docs)}", "sensitivity_correct": f"{sok}/{len(docs)}",
                                  "note": "evaluated on the 9 seed documents (not in training data; vocabulary overlaps the phrase banks)"})
     return {**base, "sklearn": sklearn.__version__, **_meta, "evaluation": _eval_cache}
