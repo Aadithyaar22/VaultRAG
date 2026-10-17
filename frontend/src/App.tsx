@@ -12,10 +12,6 @@ import { Badge, Button, Logo, icons } from "./components/ui";
 import ShaderBackground from "./components/ShaderBackground";
 
 const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-function loadAmbient(): boolean {
-  try { const v = localStorage.getItem("vr_motion"); if (v === "on") return true; if (v === "off") return false; } catch {}
-  return !reducedMotion();
-}
 type Tab = "home" | "chat" | "dashboard" | "vault" | "users" | "security" | "demo";
 type Item = { id: Tab; label: string; desc: string; icon: ReactNode; cap?: string; c: string; who?: string; can?: string[] };
 const NAV: Item[] = [
@@ -39,14 +35,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("home");
   const [screen, setScreen] = useState<"hero" | "signin">("hero");
   const [ready, setReady] = useState(!hasToken());
-  const [ambient, setAmbient] = useState(loadAmbient);
-  const toggleMotion = () => setAmbient(a => { const n = !a; try { localStorage.setItem("vr_motion", n ? "on" : "off"); } catch {} return n; });
-  const motion = (
-    <button onClick={toggleMotion} aria-pressed={ambient} title={reducedMotion() ? "Your system asks for reduced motion; the pointer still moves the background" : "Toggle the flowing background"}
-      className="liquid fixed bottom-20 right-3 z-40 !rounded-full px-4 py-2 text-xs font-medium text-slate-200 transition hover:text-white md:bottom-4 md:right-4">
-      <span className="hidden sm:inline">Flowing background: </span><span className="sm:hidden">Motion: </span><span className="font-semibold text-white">{ambient ? "On" : "Off"}</span>
-    </button>
-  );
+  const ambient = !reducedMotion();   // follows the OS setting; no on-screen control
 
   useEffect(() => {
     if (!hasToken()) return;
@@ -58,7 +47,6 @@ export default function App() {
   if (!user && screen === "hero") return (
     <>
       <ShaderBackground dim={0.3} ambient={ambient} />
-      {motion}
       <main className="flex min-h-full flex-col items-center justify-center px-6 text-center">
         <h1 className="hero-title" aria-label="VaultRAG">
           <span aria-hidden>
@@ -77,7 +65,6 @@ export default function App() {
   if (!user) return (
     <>
       <ShaderBackground dim={0.62} ambient={ambient} />
-      {motion}
       <SignIn onBack={() => setScreen("hero")} onLogin={(u) => { setUser(u); setTab("home"); }} />
     </>
   );
@@ -89,7 +76,6 @@ export default function App() {
   return (
     <div className="min-h-full pb-28 md:pb-12" style={{ ["--accent" as any]: current.c }}>
       <ShaderBackground dim={0.62} ambient={ambient} />
-      {motion}
       <header className="px-4 pt-5 sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div className="flex items-center gap-3">
