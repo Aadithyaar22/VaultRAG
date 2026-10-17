@@ -43,6 +43,7 @@ export const Card = ({ title, right, children, className = "" }: { title?: React
 export const PageHeader = ({ title, desc, right }: { title: string; desc: string; right?: ReactNode }) => (
   <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
     <div className="max-w-2xl">
+      <div className="mb-4 h-1 w-14 rounded-full" style={{ background: ACCENT_BG }} aria-hidden />
       <h1 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">{title}</h1>
       <p className="mt-2 text-[15px] leading-relaxed text-slate-300">{desc}</p>
     </div>
@@ -54,7 +55,7 @@ const tones: Record<string, string> = {
   ok: "bg-emerald-400/10 text-emerald-300 border-emerald-400/30",
   warn: "bg-amber-400/10 text-amber-300 border-amber-400/30",
   bad: "bg-rose-400/10 text-rose-300 border-rose-400/30",
-  info: "bg-cyan-300/10 text-cyan-200 border-cyan-300/25",
+  info: "bg-violet-400/10 text-violet-200 border-violet-300/30",
   mute: "bg-white/5 text-slate-300 border-white/10",
 };
 export const Badge = ({ tone = "mute", children }: { tone?: keyof typeof tones; children: ReactNode }) => (
@@ -65,13 +66,19 @@ export const Badge = ({ tone = "mute", children }: { tone?: keyof typeof tones; 
 
 /* ---------- buttons ---------- */
 type Variant = "primary" | "ghost" | "danger";
+/** Primary buttons follow the current page accent (--accent), falling back to teal. */
+const ACCENT_BG = "linear-gradient(120deg, var(--accent, #5eead4), color-mix(in srgb, var(--accent, #5eead4) 45%, #8b7bff))";
+const ACCENT_GLOW = "0 0 30px -6px color-mix(in srgb, var(--accent, #5eead4) 70%, transparent)";
 const variantCls: Record<Variant, string> = {
-  primary: "bg-gradient-to-r from-teal-200 to-sky-300 text-ink hover:shadow-[0_0_28px_-4px_rgba(94,234,212,0.6)]",
+  primary: "text-ink",
   ghost: "border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10 hover:border-white/25",
   danger: "border border-rose-400/50 bg-rose-400/10 text-rose-200 hover:bg-rose-400/20 hover:shadow-[0_0_24px_-4px_rgba(251,113,133,0.5)]",
 };
 export const Button = ({ variant = "primary", busy, className = "", children, ...p }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; busy?: boolean }) => (
   <button {...p} disabled={p.disabled || busy}
+    style={{ ...(variant === "primary" ? { background: ACCENT_BG } : {}), ...p.style }}
+    onMouseEnter={e => { if (variant === "primary") e.currentTarget.style.boxShadow = ACCENT_GLOW; p.onMouseEnter?.(e); }}
+    onMouseLeave={e => { if (variant === "primary") e.currentTarget.style.boxShadow = ""; p.onMouseLeave?.(e); }}
     className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 hover:scale-[1.02] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${variantCls[variant]} ${className}`}>
     {busy && <span className="spinner" aria-hidden />}{children}
   </button>
@@ -101,7 +108,8 @@ export function SplitButton({ label, onClick, items, variant = "primary", busy, 
   }, [open]);
   const seg = `inline-flex items-center gap-2 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50`;
   return (
-    <div ref={box} className={`relative inline-flex rounded-full ${variantCls[variant]} transition duration-200`}>
+    <div ref={box} style={variant === "primary" ? { background: ACCENT_BG } : undefined}
+      className={`relative inline-flex rounded-full ${variantCls[variant]} transition duration-200`}>
       <button type="button" className={`${seg} rounded-l-full pl-5 pr-3`} onClick={onClick} disabled={disabled || busy}>
         {busy && <span className="spinner" aria-hidden />}{label}
       </button>
@@ -128,9 +136,9 @@ export const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...p} className={`glow-focus w-full rounded-full border border-white/12 bg-black/30 px-5 py-3 text-sm placeholder:text-slate-500 ${p.className || ""}`} />
 );
 
-export const Stat = ({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) => (
-  <div className="liquid p-5">
-    <div className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">{label}</div>
+export const Stat = ({ label, value, hint, c = "#5eead4" }: { label: string; value: ReactNode; hint?: string; c?: string }) => (
+  <div className="liquid p-5" style={{ background: `radial-gradient(130% 100% at 0% 0%, ${c}26, transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))`, boxShadow: `inset 0 2px 0 0 ${c}77, 0 24px 60px -28px rgba(0,0,0,0.75)` }}>
+    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-300"><span className="h-2 w-2 rounded-full" style={{ background: c, boxShadow: `0 0 10px ${c}` }} aria-hidden />{label}</div>
     <div className="mt-2 font-display text-4xl font-bold tracking-tight text-white">{value}</div>
     {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
   </div>

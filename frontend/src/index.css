@@ -41,7 +41,7 @@ select { font-size: 0.85rem; }
 .liquid-flat { border-radius: 1rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
 .glow-focus:focus { border-color: rgba(94,234,212,0.7); box-shadow: 0 0 0 4px rgba(94,234,212,0.12); outline: none; }
 
-.gradient-text { background: linear-gradient(120deg, #ffffff 10%, #a7f3e6 45%, #8fb4ff 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gradient-text { background: linear-gradient(110deg, #ffffff 5%, #9ff3e3 32%, #9db8ff 62%, #d8a8ff 85%, #ff9fd0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 @keyframes bead { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .bead { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; animation: bead 2s ease-in-out infinite; }

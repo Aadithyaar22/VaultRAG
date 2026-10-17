@@ -21,14 +21,14 @@ export default function Dashboard({ user, desc }: { user: User; desc: string }) 
       <PageHeader title="Dashboard" desc={desc} right={<div className="flex gap-2"><Badge tone="ok">live measurements</Badge><Badge tone="mute">{s.scope === "all_users" ? "all users" : "your activity only"}</Badge></div>} />
       <p className="text-xs text-slate-500">{s.source}</p>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Documents you can read" value={s.documents} />
-        <Stat label="Queries processed" value={s.queries} />
-        <Stat label="Blocked responses" value={s.blocked} />
-        <Stat label="Abstentions" value={s.abstained} />
-        <Stat label="Revocation events" value={s.revocation_events} />
-        <Stat label="Stale-cache rejections" value={s.stale_cache_rejections} />
-        <Stat label="Injection detections" value={s.injection_detections} />
-        <Stat label="Cache invalidations" value={s.cache_invalidations ?? "—"} hint={s.cache_invalidations == null ? "reviewers only" : undefined} />
+        <Stat c="#5eead4" label="Documents you can read" value={s.documents} />
+        <Stat c="#60a5fa" label="Queries processed" value={s.queries} />
+        <Stat c="#fb7185" label="Blocked responses" value={s.blocked} />
+        <Stat c="#fbbf24" label="Abstentions" value={s.abstained} />
+        <Stat c="#a78bfa" label="Revocation events" value={s.revocation_events} />
+        <Stat c="#f472b6" label="Stale-cache rejections" value={s.stale_cache_rejections} />
+        <Stat c="#e879f9" label="Injection detections" value={s.injection_detections} />
+        <Stat c="#34d399" label="Cache invalidations" value={s.cache_invalidations ?? "—"} hint={s.cache_invalidations == null ? "reviewers only" : undefined} />
       </div>
       {reviewer && (
         <>
