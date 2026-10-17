@@ -42,3 +42,9 @@ export const Stat = ({ label, value, hint }: { label: string; value: ReactNode; 
 
 export const statusTone = (s: string) => ({ answered: "ok", abstained: "warn", denied: "bad", error: "bad", released: "ok", blocked: "bad", flagged: "warn", discarded: "bad", ok: "ok" } as Record<string, any>)[s] || "mute";
 export const ErrorNote = ({ msg }: { msg: string | null }) => msg ? <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{msg}</div> : null;
+
+/** Minimal inline markdown (bold only) for model answers; everything else renders as plain text (no HTML injection). */
+export const RichText = ({ text }: { text: string }) => (
+  <>{text.split(/(\*\*[^*]+\*\*)/g).map((p, i) =>
+    p.startsWith("**") && p.endsWith("**") && p.length > 4 ? <strong key={i} className="font-semibold text-white">{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>)}</>
+);

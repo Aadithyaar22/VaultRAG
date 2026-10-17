@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, ChatResult } from "../api";
-import { Badge, Button, Card, ErrorNote, statusTone } from "../components/ui";
+import { Badge, Button, Card, ErrorNote, RichText, statusTone } from "../components/ui";
 
 const USERS = ["alice", "hannah", "frank", "leo", "maya", "adam"];
 const Q = "How many weeks of paid parental leave do primary caregivers receive?";
@@ -49,7 +49,7 @@ export default function Demo() {
       </div>
       {out && (
         <Card title={`Result — ${out.title}`} right={r && <Badge tone={statusTone(r.status)}>{r.status}</Badge>}>
-          {r && <p className="mb-2 text-sm">{r.answer || <i>(no answer released: {r.reason})</i>}</p>}
+          {r && <p className="mb-2 text-sm">{r.answer ? <RichText text={r.answer} /> : <i>(no answer released: {r.reason})</i>}</p>}
           {out.data.trace && <ol className="mb-2 list-decimal pl-5 text-xs text-slate-300">{out.data.trace.map((e: any) => <li key={e.seq}><code>{e.event_type}</code> — {e.outcome} {e.detail?.reasons ? `(${e.detail.reasons.join(", ")})` : ""}</li>)}</ol>}
           <details><summary className="cursor-pointer text-xs text-slate-400">Raw response</summary><pre className="mt-2 overflow-x-auto rounded bg-ink p-2 text-xs">{JSON.stringify(out.data, null, 2)}</pre></details>
         </Card>

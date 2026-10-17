@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { api, ChatResult, User } from "../api";
-import { Badge, Button, Card, ErrorNote, statusTone } from "../components/ui";
+import { Badge, Button, Card, ErrorNote, RichText, statusTone } from "../components/ui";
 
 type Turn = { q: string; r?: ChatResult; err?: string };
 const SUGGESTIONS = ["What is the Level 5 salary band?", "How many weeks of paid parental leave do primary caregivers receive?", "How many days of annual leave do employees get?", "What is the Q3 marketing budget?"];
@@ -60,7 +60,7 @@ export default function Chat({ user }: { user: User }) {
               <>
                 {t.r.status === "denied" && <p className="text-sm text-red-300">Access denied: this response was blocked and discarded ({t.r.reason}).</p>}
                 {t.r.status === "error" && <p className="text-sm text-red-300">{t.r.answer}</p>}
-                {(t.r.status === "answered" || t.r.status === "abstained") && <p className="whitespace-pre-wrap text-sm leading-relaxed">{t.r.answer}</p>}
+                {(t.r.status === "answered" || t.r.status === "abstained") && <p className="whitespace-pre-wrap text-sm leading-relaxed"><RichText text={t.r.answer} /></p>}
                 {t.r.citations.length > 0 && (
                   <div className="mt-3 grid gap-1">
                     {t.r.citations.map(c => (
