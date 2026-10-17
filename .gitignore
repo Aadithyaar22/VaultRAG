@@ -10,6 +10,5 @@ backend/data/
 keys/
 *.pem
 docs/project_guide/guide.html
-submission/src/deck.html
 .DS_Store
 **/.DS_Store

@@ -20,7 +20,7 @@
 ![React](https://img.shields.io/badge/React%20%2B%20TypeScript-000000?style=flat-square)
 ![SQLite](https://img.shields.io/badge/SQLite-000000?style=flat-square)
 
-[**Project guide (PDF)**](docs/PROJECT_GUIDE.pdf) &nbsp;·&nbsp; [**Live demo**](http://148.100.99.19:8000) &nbsp;·&nbsp; [**Real-document test**](docs/REAL_DOCUMENT_TEST.md) &nbsp;·&nbsp; [**Submission package**](submission/)
+[**Project guide (PDF)**](docs/PROJECT_GUIDE.pdf) &nbsp;·&nbsp; [**Live demo**](http://148.100.99.19:8000) &nbsp;·&nbsp; [**Real-document test**](docs/REAL_DOCUMENT_TEST.md)
 
 </div>
 
@@ -66,7 +66,7 @@ Use AI on sensitive data **without exposing** that data. Here is how VaultRAG an
 ## How it works
 
 <div align="center">
-<img src="submission/02_architecture_diagram.png" alt="VaultRAG system architecture" width="92%">
+<img src="docs/images/architecture.png" alt="VaultRAG system architecture" width="92%">
 </div>
 
 <br>
@@ -210,7 +210,6 @@ backend/tests/      42 tests (security · extraction · ML)
 backend/scripts/    benchmark.py and real_docs/ (download + test scripts for the real-document test)
 frontend/src/       App · api · views/ (Home, Chat, Dashboard, Vault, Users, Security, Demo, Login) · components/
 docs/               PROJECT_GUIDE.pdf · REAL_DOCUMENT_TEST.md · BENCHMARK*.md · IBM_LAB_EVIDENCE.md · images/
-submission/         pitch deck · architecture diagram · form answers · video script · judge Q&A · checklist
 sample_data/        the poisoned file used in the demo
 ```
 
@@ -239,7 +238,6 @@ Details and numbers: [`docs/PROJECT_GUIDE.pdf`](docs/PROJECT_GUIDE.pdf) (Part D)
 | [`docs/REAL_DOCUMENT_TEST.md`](docs/REAL_DOCUMENT_TEST.md) | Real-document test across all roles; bugs found and fixed; independent injection benchmark; how to reproduce |
 | [`docs/BENCHMARK.md`](docs/BENCHMARK.md) · [`BENCHMARK_s390x.md`](docs/BENCHMARK_s390x.md) | Our benchmark against two baselines (Mac and LinuxONE) |
 | [`docs/IBM_LAB_EVIDENCE.md`](docs/IBM_LAB_EVIDENCE.md) | The mandatory IBM Jupyter AI/ML lab |
-| [`submission/`](submission/) | Hackathon package: deck, diagram, form answers, video script, judge Q&A, open-source list, checklist |
 
 <br>
 
