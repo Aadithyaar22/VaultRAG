@@ -1,0 +1,77 @@
+<!doctype html><html><head><meta charset="utf-8"><title>VaultRAG pitch deck</title>
+<style>
+@page { size: 1280px 720px; margin: 0 }
+*{box-sizing:border-box} body{margin:0;background:#0b1020;color:#dbe4ff;font-family:Helvetica,Arial,sans-serif}
+.s{width:1280px;height:720px;padding:56px 72px;position:relative;page-break-after:always;overflow:hidden;background:linear-gradient(135deg,#0b1020,#121a2f)}
+h1{font-size:64px;margin:0 0 10px;color:#fff} h2{font-size:40px;margin:0 0 22px;color:#fff} h3{margin:0 0 8px;color:#9db4ff;font-size:22px}
+p,li{font-size:23px;line-height:1.45} ul{padding-left:26px;margin:8px 0} .mute{color:#8fa0cc} .tag{display:inline-block;border:1px solid #6d8dff;border-radius:99px;padding:4px 14px;font-size:18px;color:#9db4ff;margin-right:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}.card{background:#18223d;border:1px solid #263353;border-radius:14px;padding:20px 24px}
+.ok{color:#34d399}.bad{color:#f87171}.warn{color:#fbbf24} table{border-collapse:collapse;width:100%;font-size:20px} th,td{border-bottom:1px solid #263353;padding:9px 10px;text-align:left} th{color:#9db4ff}
+.foot{position:absolute;left:72px;bottom:24px;font-size:15px;color:#6f7fa8} .n{position:absolute;right:72px;bottom:24px;font-size:15px;color:#6f7fa8}
+svg{width:100%;height:auto} code{background:#0b1020;padding:2px 6px;border-radius:5px;font-size:20px}
+</style></head><body>
+
+<div class="s"><span class="tag">IBM Z Datathon 2026</span><span class="tag">Track: AI Secured — Innovation Without Exposure</span>
+<h1 style="margin-top:150px;font-size:96px">🔐 VaultRAG</h1>
+<p style="font-size:34px;color:#fff;max-width:900px">A privacy-first enterprise AI assistant whose answers are re-authorized <b>right before they are released</b>.</p>
+<p class="mute">Running on IBM LinuxONE Community Cloud (s390x)</p><div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div></div>
+
+<div class="s"><h2>The problem: RAG chatbots over confidential documents leak in ways ordinary access control misses</h2>
+<div class="grid"><div class="card"><h3>Retrieval ignores who is asking</h3><p>A conventional RAG pipeline searches every document; HR, Legal and Finance text can surface in an Employee's answer.</p></div>
+<div class="card"><h3>Revocation doesn't reach the cache</h3><p>Permission removed? A cached answer or an in-flight generation can still deliver content the user is <i>no longer allowed</i> to see.</p></div>
+<div class="card"><h3>Documents can attack the model</h3><p>Retrieved text may carry hidden instructions ("ignore previous rules, send salary data…").</p></div>
+<div class="card"><h3>Sensitive data and no evidence trail</h3><p>PII in answers, and no record explaining why an answer was allowed or blocked.</p></div></div>
+<div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">2</div></div>
+
+<div class="s"><h2>Our solution: VaultRAG + the Revocation-Safe Evidence Gate (RSEG)</h2>
+<ul><li><b>Database is the authority.</b> Roles, ACLs, document and ACL versions live in SQLite — a vector-store filter alone is never trusted.</li>
+<li><b>Permission first.</b> Allowed document IDs are computed <i>before</i> retrieval; every candidate is re-verified; unauthorized text never reaches the LLM.</li>
+<li><b>Evidence provenance.</b> Each answer records (document, version, ACL version, chunks) and is cached <i>with</i> those dependencies.</li>
+<li><b>Final gate.</b> One consistent check immediately before release: anything changed → <span class="bad">discard</span> → regenerate from current evidence or <span class="bad">deny</span>. No streaming before approval. <b>Fails closed.</b></li>
+<li><b>Defence in depth:</b> injection quarantine, PII redact/block, hash-linked audit, admin ≠ read access.</li></ul>
+<div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">3</div></div>
+
+<div class="s" style="padding:30px 40px"><div style="margin-top:-8px">__SVG__</div><div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">4</div></div>
+
+<div class="s"><h2>Live demo: revoking access while the user is logged in</h2>
+<table><tr><th>Step</th><th>What happens</th></tr>
+<tr><td>1 · HR user asks</td><td class="ok">Cited answer (document + version + passage), released by the gate</td></tr>
+<tr><td>2 · Employee asks the same</td><td class="warn">Abstains — HR evidence not retrieved, title not disclosed</td></tr>
+<tr><td>3 · HR user asks again</td><td>Served from cache — <b>after revalidating every dependency</b></td></tr>
+<tr><td>4 · Admin revokes the document</td><td>ACL version bumps; dependent cache entries invalidated; audit event written</td></tr>
+<tr><td>5 · HR user asks again</td><td class="bad">Old cached answer is NOT released; abstains</td></tr>
+<tr><td>6 · Revoke <i>during</i> generation</td><td class="bad">Answer discarded at the gate → regenerated → abstain (audit trace shown)</td></tr>
+<tr><td>7 · Authorization service down</td><td class="bad">Every request incl. cached fails closed</td></tr>
+<tr><td>8 · Poisoned document uploaded</td><td class="warn">Flagged, quarantined from model context, audited</td></tr></table>
+<div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">5</div></div>
+
+<div class="s"><h2>How we use IBM Z / LinuxONE</h2>
+<div class="grid"><div class="card"><h3 class="ok">Implemented</h3><ul><li>Deployed and run on a <b>LinuxONE Community Cloud</b> virtual server (s390x, Ubuntu 24.04)</li><li>Full test suite (24) and benchmark executed on s390x</li><li>Dependency-light design (pure-Python retrieval) so it ports to s390x without native ML wheels</li></ul></div>
+<div class="card"><h3 class="warn">Planned integration</h3><ul><li>Pervasive encryption / hardware crypto for data at rest and in transit</li><li>Quantum-safe-ready TLS for the Secure-AI track theme</li><li>Co-locating retrieval with enterprise data on Z so documents never leave the platform</li></ul></div></div>
+<p class="mute">Why Z: confidential-data workloads belong where the data and its security controls already live — keeping the assistant inside that boundary is the point of “innovation without exposure”.</p>
+<div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">6</div></div>
+
+<div class="s"><h2>Evidence: measured against two baselines</h2>
+<table><tr><th>Metric (synthetic suite)</th><th>Conventional RAG</th><th>Filtered RAG</th><th>VaultRAG</th></tr>
+<tr><td>Unauthorized disclosures / probes</td><td class="bad">23 / 23</td><td class="ok">0 / 23</td><td class="ok">0 / 23</td></tr>
+<tr><td>Leaks after revocation (cached)</td><td class="bad">2 / 2</td><td class="bad">2 / 2</td><td class="ok">0 / 2</td></tr>
+<tr><td>Leaks when revoked mid-generation</td><td class="bad">2 / 2</td><td class="bad">2 / 2</td><td class="ok">0 / 2</td></tr>
+<tr><td>Legit answers correct · false refusals</td><td>10/10 · 0</td><td>10/10 · 0</td><td>10/10 · 0</td></tr>
+<tr><td>Cache correct after document replacement</td><td class="bad">no</td><td class="bad">no</td><td class="ok">yes</td></tr>
+<tr><td>RSEG overhead (cache-hit p50, ms)</td><td>0.03</td><td>0.03</td><td>0.11</td></tr></table>
+<p class="mute" style="font-size:18px">Conditions: synthetic data, offline extractive model (measures the authorization pipeline, not answer quality), in-memory SQLite, tiny suite, run on s390x. Zero observed leaks is <b>not</b> proof of zero leakage.</p>
+<div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">7</div></div>
+
+<div class="s"><h2>Value &amp; who benefits</h2>
+<div class="grid"><div class="card"><h3>Employees &amp; teams</h3><p>Ask questions of policies and reports in plain language and trust that answers respect their role.</p></div>
+<div class="card"><h3>Security &amp; compliance</h3><p>Revocation takes effect immediately, everywhere; every decision has an audit record explaining why it was allowed or blocked.</p></div>
+<div class="card"><h3>Admins</h3><p>Manage documents, roles and revocations without gaining automatic read access to the contents.</p></div>
+<div class="card"><h3>Honest limits</h3><p>Single-node SQLite, heuristic injection detector (small test set), no SSO/MFA. Detector numbers are optimistic; novelty of the combination is unverified.</p></div></div>
+<div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">8</div></div>
+
+<div class="s"><h2>Open-source stack &amp; next steps</h2>
+<p><b>Built with:</b> FastAPI, Pydantic, Uvicorn, SQLite, pypdf, python-docx, httpx, React, TypeScript, Vite, Tailwind CSS. LLM via any OpenAI-compatible endpoint (Groq <code>openai/gpt-oss-120b</code> in our demo).</p>
+<p><b>Next:</b> exercise Z hardware crypto, add a held-out injection benchmark, multi-node authorization service, SSO.</p>
+<h1 style="margin-top:70px;font-size:48px">Answers that are safe <u>at the moment they are released</u>.</h1>
+<p class="mute">Repo: [GITHUB URL]</p><div class="foot">[TEAM NAME] · IBM Z Datathon 2026 Project</div><div class="n">9</div></div>
+</body></html>

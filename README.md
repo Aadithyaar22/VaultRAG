@@ -54,7 +54,7 @@ for tests/benchmarks/no-network demos; the UI labels it as such.
 1. Sign in as **hannah**, ask *"How many weeks of paid parental leave do primary caregivers receive?"* → cited answer, badge "Released by security gate".
 2. Sign in as **alice**, same question → abstains; no HR title/passage is exposed. Vault lists only the handbook.
 3. As hannah, ask again → `cache: hit revalidated` (cached answer, but dependencies were re-checked).
-4. As **adam** (Document Vault) revoke HR access (or Demo Controls → ask as hannah → Document Vault → add deny).
+4. As **adam** (Document Vault) untick the **hr** role on "HR Parental Leave Policy" (log in as adam in another browser/private window to keep hannah logged in).
 5. hannah asks again, still logged in → **cached answer not released**; abstains. Security Center shows `permission_changed`, `cache_invalidated`.
 6. Demo Controls → **Revoke during generation** → audit trace shows `revocation_detected_before_release` → discard → regenerate → abstain.
 7. Demo Controls → **Simulate outage** → every request incl. cached ones is denied (fail closed). Restore.
