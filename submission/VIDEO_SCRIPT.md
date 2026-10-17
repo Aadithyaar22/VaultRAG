@@ -2,14 +2,14 @@
 
 Format: screen recording + voice-over, MP4, 1080p. Required by the rules: problem, **supporting data**, solution overview, IBM Z tech stack, **live demo of the LinuxONE instance and model**. Screenshots of LinuxONE are judged evidence — show them on screen.
 
-Setup before recording: reset demo data (Admin Demo Controls → Reset). Open two things: (a) terminal SSH'd into the LinuxONE instance, (b) the app via tunnel `ssh -N -L 8001:127.0.0.1:8000 -i keys/hacktivists.pem linux1@148.100.99.19` → http://localhost:8001 (this IS the s390x server).
+Setup before recording: reset demo data (Admin Demo Controls → Reset). Open two things: (a) terminal SSH'd into the LinuxONE instance, (b) the app served directly from the LinuxONE server: **http://148.100.99.19:8000** (browser will say "Not secure" because it is plain HTTP — expected; the address bar showing the LinuxONE IP is part of the evidence).
 
 | Time | Show | Say |
 |---|---|---|
 | 0:00–0:20 | Slide 2 (problem) | "Companies want to ask questions of confidential documents — but ordinary RAG chatbots retrieve from everything, and even permission-filtered ones fail when access changes: a cached or in-flight answer can still reach someone who was just revoked. Documents can also carry hidden instructions." |
 | 0:20–0:35 | Slide 7 table (supporting data) | "On our test suite, conventional RAG disclosed restricted content in all 23 probes; filter-only RAG leaked in both revocation scenarios. VaultRAG leaked in none — small synthetic suite, not a proof." |
 | 0:35–0:55 | Slide 4 (architecture) | "VaultRAG keeps permissions in a database, retrieves only from allowed documents, and our Revocation-Safe Evidence Gate re-checks every supporting document and its version right before releasing an answer. Fail closed." |
-| 0:55–1:15 | **Terminal on LinuxONE**: `uname -m` → s390x, `cat /etc/os-release`, `pgrep -af uvicorn`; browser at localhost:8001 | "Everything runs on this IBM LinuxONE Community Cloud server — s390x, Ubuntu 24.04 — and the model is Groq-hosted gpt-oss-120b via an OpenAI-compatible API." |
+| 0:55–1:15 | **Terminal on LinuxONE**: `uname -m` → s390x, `cat /etc/os-release`, `pgrep -af uvicorn`; browser at http://148.100.99.19:8000 | "Everything runs on this IBM LinuxONE Community Cloud server — s390x, Ubuntu 24.04 — and the model is Groq-hosted gpt-oss-120b via an OpenAI-compatible API." |
 | 1:15–1:40 | Login **hannah** → ask parental-leave question | "As an HR user: a grounded answer with a citation to the HR policy, version one, and a security badge — released by the gate." |
 | 1:40–1:55 | Switch to **alice** → same question | "An employee asks the same: no HR evidence retrieved, no title revealed." |
 | 1:55–2:20 | Hannah asks again → "cache: hit revalidated". Then Vault as **adam** → on "HR Parental Leave Policy" untick the **hr** role. Hannah asks again | "Cached — but revalidated. Now the admin revokes access while she's logged in. Same question: the old cached answer is not released." |
