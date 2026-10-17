@@ -234,7 +234,7 @@ Details and numbers: [`docs/PROJECT_GUIDE.pdf`](docs/PROJECT_GUIDE.pdf) (Part D)
 
 | Read this | For |
 |---|---|
-| [`docs/PROJECT_GUIDE.pdf`](docs/PROJECT_GUIDE.pdf) | **Start here (36 pages)** — plain English first, then architecture, code map, database, every pipeline, API, settings, operating the LinuxONE server, tests, limits |
+| [`docs/PROJECT_GUIDE.pdf`](docs/PROJECT_GUIDE.pdf) | **Start here (35 pages)** — plain English first, then architecture, code map, database, every pipeline, API, settings, operating the LinuxONE server, tests, limits |
 | [`docs/REAL_DOCUMENT_TEST.md`](docs/REAL_DOCUMENT_TEST.md) | Real-document test across all roles; bugs found and fixed; independent injection benchmark; how to reproduce |
 | [`docs/BENCHMARK.md`](docs/BENCHMARK.md) · [`BENCHMARK_s390x.md`](docs/BENCHMARK_s390x.md) | Our benchmark against two baselines (Mac and LinuxONE) |
 | [`docs/IBM_LAB_EVIDENCE.md`](docs/IBM_LAB_EVIDENCE.md) | The mandatory IBM Jupyter AI/ML lab |
