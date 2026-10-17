@@ -9,3 +9,5 @@ dist/
 backend/data/
 keys/
 *.pem
+docs/project_guide/guide.html
+submission/src/deck.html

@@ -1,0 +1,47 @@
+@page { size: A4; margin: 20mm 17mm 20mm 17mm;
+  @top-left { content: "VaultRAG · Project Guide"; font: 500 8pt "Inter", sans-serif; color: #8a8478; }
+  @top-right { content: "IBM Z Datathon 2026 · Team Hacktivists"; font: 500 8pt "Inter", sans-serif; color: #8a8478; }
+  @bottom-center { content: counter(page); font: 500 9pt "Inter", sans-serif; color: #6b665c; } }
+@page :first { @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 10.4pt; line-height: 1.55; color: #17150f; margin: 0; }
+h1, h2, h3, h4 { font-family: "Manrope", "Inter", sans-serif; color: #0b0a07; letter-spacing: -0.01em; line-height: 1.2; }
+h1.part { font-size: 27pt; margin: 0 0 4mm; padding-top: 0; break-before: page; }
+.part-kicker { font: 600 8.5pt "Inter"; letter-spacing: 0.18em; text-transform: uppercase; color: #8a7d5c; margin-bottom: 2mm; }
+h2 { font-size: 15.5pt; margin: 8mm 0 2.5mm; padding-bottom: 1.6mm; border-bottom: 1.2px solid #e4dcc6; break-after: avoid; }
+h3 { font-size: 11.6pt; margin: 5.5mm 0 1.5mm; break-after: avoid; }
+h4 { font-size: 10.4pt; font-weight: 700; margin: 4mm 0 1mm; color: #17150f; break-after: avoid; }
+p { margin: 0 0 2.6mm; } ul, ol { margin: 0 0 3mm; padding-left: 5.2mm; } li { margin-bottom: 1.1mm; }
+a { color: #17150f; text-decoration: underline; text-decoration-color: #c9bd9a; }
+code, pre, .mono { font-family: "JetBrains Mono", Menlo, monospace; }
+code { font-size: 8.8pt; background: #f4efe2; padding: 0.3mm 1.3mm; border-radius: 1.2mm; }
+pre { font-size: 8pt; line-height: 1.45; background: #14120d; color: #f2ecdc; padding: 3.2mm 4mm; border-radius: 2.4mm; margin: 0 0 3.5mm; white-space: pre-wrap; break-inside: avoid; }
+pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+table { width: 100%; border-collapse: collapse; margin: 0 0 4mm; font-size: 9.2pt; break-inside: auto; }
+th { text-align: left; background: #14120d; color: #f6f0df; font: 600 8.4pt "Inter"; padding: 1.8mm 2.4mm; }
+td { padding: 1.7mm 2.4mm; border-bottom: 0.6px solid #e4dfd0; vertical-align: top; } tr { break-inside: avoid; }
+tr:nth-child(even) td { background: #faf7ee; }
+.simple, .note, .warn { border-radius: 2.4mm; padding: 3mm 4mm; margin: 0 0 4mm; break-inside: avoid; }
+.simple { background: #f6f0df; border-left: 1.6mm solid #c2b27f; }
+.note { background: #f1f1ef; border-left: 1.6mm solid #17150f; }
+.warn { background: #fff; border: 1px dashed #17150f; }
+.simple b.t, .note b.t, .warn b.t { display: block; font: 700 8.2pt "Inter"; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1mm; color: #5d5233; }
+.note b.t, .warn b.t { color: #17150f; }
+.fig { margin: 2mm 0 4.5mm; break-inside: avoid; } .fig svg { width: 100%; height: auto; display: block; }
+.fig .cap { font-size: 8.4pt; color: #6b665c; margin-top: 1mm; text-align: center; font-style: italic; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; } .cols > div { break-inside: avoid; }
+.pill { display: inline-block; font: 600 7.6pt "Inter"; letter-spacing: 0.04em; border: 0.8px solid #17150f; border-radius: 99px; padding: 0.3mm 2.2mm; margin-right: 1mm; }
+.pill.fill { background: #17150f; color: #f6f0df; } .pill.dash { border-style: dashed; }
+.toc { columns: 2; column-gap: 8mm; font-size: 9.6pt; } .toc div { margin-bottom: 1.2mm; break-inside: avoid; } .toc b { font-family: "Manrope"; }
+.cover { height: 257mm; display: flex; flex-direction: column; justify-content: space-between; break-after: page; }
+.cover .title { font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif; font-style: italic; font-size: 70pt; line-height: 0.95; letter-spacing: -0.015em; margin: 0; color: #0b0a07; }
+.cover .title b { font-weight: 700; color: #8f8156; }
+.cover .rule { height: 1px; width: 60mm; background: #17150f; margin: 8mm 0 6mm; position: relative; } .cover .rule::after { content: ""; position: absolute; left: 50%; top: -2.2px; width: 5px; height: 5px; background: #8f8156; transform: rotate(45deg); }
+.cover .sub { font: 500 15pt "Manrope"; line-height: 1.35; max-width: 130mm; }
+.cover .meta { font-size: 9.4pt; line-height: 1.7; color: #3b372d; } .cover .meta b { color: #0b0a07; }
+.cover .band { background: #14120d; color: #f6f0df; padding: 5mm 6mm; border-radius: 3mm; font-size: 9.6pt; }
+.small { font-size: 8.6pt; color: #5d5a50; } .nobr { white-space: nowrap; }
+
+thead { display: table-header-group; }
+.tight td { padding: 1mm 2.4mm; font-size: 8.8pt; }

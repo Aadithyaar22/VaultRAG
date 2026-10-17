@@ -1,0 +1,17 @@
+<svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#17150f"/></marker></defs>
+<line x1="20" y1="78" x2="740" y2="78" stroke="#17150f" stroke-width="2" marker-end="url(#a)"/><text x="20" y="64" font-size="10" fill="#6b665c">time →</text>
+<g font-size="10.4" text-anchor="middle">
+<circle cx="70" cy="78" r="6" fill="#17150f"/><text x="70" y="104" font-weight="700">Hannah asks</text><text x="70" y="118" fill="#4a463c">HR question</text>
+<circle cx="200" cy="78" r="6" fill="#17150f"/><text x="200" y="104" font-weight="700">Search + sources</text><text x="200" y="118" fill="#4a463c">HR policy v1 (ACL v1)</text>
+<circle cx="330" cy="78" r="6" fill="#17150f"/><text x="330" y="104" font-weight="700">AI is writing…</text><text x="330" y="118" fill="#4a463c">(takes ~1 second)</text>
+<circle cx="440" cy="78" r="9" fill="#fff" stroke="#17150f" stroke-width="2.4"/><text x="440" y="50" font-weight="700">Admin removes HR access</text><text x="440" y="36" fill="#4a463c" font-size="9.6">ACL v1 → v2 (at the worst moment)</text>
+<circle cx="560" cy="78" r="8" fill="#17150f"/><text x="560" y="104" font-weight="700">FINAL GATE</text><text x="560" y="118" fill="#4a463c">asks the database again</text>
+<circle cx="690" cy="78" r="6" fill="#17150f"/><text x="690" y="104" font-weight="700">Answer thrown away</text><text x="690" y="118" fill="#4a463c">retry with what is allowed</text></g>
+<rect x="20" y="144" width="720" height="92" rx="10" fill="#faf7ee" stroke="#17150f"/>
+<g font-size="10.2" fill="#2b2820"><text x="34" y="164" font-weight="700">What the gate compares (one consistent database read):</text>
+<text x="34" y="182">• document still exists and is active?     • document version = the version the answer used?</text>
+<text x="34" y="197">• permission (ACL) version = the one the answer used?     • user still active, same user-version?</text>
+<text x="34" y="212">• can this user read every source <tspan font-weight="700">right now</tspan> (computed again from the database, not from memory)?</text>
+<text x="34" y="228" font-weight="700">Any "no", or any error → NOT released. Retry once with current evidence; if still no → denied (fails closed).</text></g>
+</svg>

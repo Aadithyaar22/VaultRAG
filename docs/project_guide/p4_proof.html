@@ -1,0 +1,89 @@
+<div class="part-kicker" style="break-before:page">Part D</div>
+<h1 class="part" style="break-before:avoid">Proof and honesty</h1>
+<p>Judges (and we) should know exactly what has been shown to work and what has not. This part lists every test, the real numbers, and every weakness we know about.</p>
+
+<h2>D1 · The automated tests (42)</h2>
+<table><tr><th style="width:24%">File</th><th style="width:8%">Tests</th><th>What it proves</th></tr>
+<tr><td><code>test_security.py</code></td><td>28</td><td>Role-based access; unauthorized users get no text and no titles; admin has no read shortcut; multi-role union and personal deny; metadata hiding (404 identical to “missing”); server-side capability checks; revocation after caching; stale cache rejected even when invalidation is missed; replacement shows the new version; role change clears cache; permission change during generation; outage fails closed (also at the gate and for cached answers); injection in uploaded documents; injected sentences removed but legitimate text kept; PII redact/block; audit chain is tamper-evident and holds no raw content; model-not-configured is explicit; citation styles accepted and uncited answers blocked; one citation retry; rate-limit retries; chunk overlap.</td></tr>
+<tr><td><code>test_extract.py</code></td><td>6</td><td>DOCX tables are read in order; garbled font output is detected; non-Latin text is not wrongly rejected; mostly-unreadable files are refused; ordinary regulatory prose is not flagged; topic-switch attacks are caught.</td></tr>
+<tr><td><code>test_ml.py</code></td><td>8</td><td>Document classifier and suggested roles; over-exposure warning; injection classifier; ML catches a paraphrase the rules miss; anomaly detector flags probing but not normal use; suggest/risk endpoints enforce capabilities; upload over-exposure warning is audited.</td></tr></table>
+<p>All 42 pass on the Mac <b>and on the s390x server</b> (<code>pytest -q</code>).</p>
+
+<h2>D2 · Our own benchmark: VaultRAG against two baselines</h2>
+<p>Script: <code>backend/scripts/benchmark.py</code> (report: <code>docs/BENCHMARK.md</code>, and <code>docs/BENCHMARK_s390x.md</code> from the server). Same code, three modes: <b>Conventional</b> (no document permissions), <b>Filtered</b> (permission-filtered search only, naive cache, no last check) and <b>VaultRAG</b>.</p>
+<table><tr><th style="width:44%">Measure</th><th>Conventional</th><th>Filtered</th><th>VaultRAG</th></tr>
+<tr><td>Unauthorized disclosures / probes</td><td><b>23 / 23</b></td><td>0 / 23</td><td>0 / 23</td></tr>
+<tr><td>Leaks after revocation (cached answer)</td><td>2 / 2</td><td>2 / 2</td><td><b>0 / 2</b></td></tr>
+<tr><td>Leaks when access is removed mid-generation</td><td>2 / 2</td><td>2 / 2</td><td><b>0 / 2</b></td></tr>
+<tr><td>Legitimate answers correct / false refusals</td><td>10/10 · 0</td><td>10/10 · 0</td><td>10/10 · 0</td></tr>
+<tr><td>Cache correct after a document is replaced</td><td>no</td><td>no</td><td><b>yes</b></td></tr>
+<tr><td>Cache-hit time (median, ms): the cost of the Last Check</td><td>0.03</td><td>0.03</td><td>0.11</td></tr></table>
+<div class="warn"><b class="t">Read this before quoting the table</b>Synthetic documents we wrote; 6 secrets × 5 users + 10 normal questions; an <i>offline extractive</i> model (so it measures the permission pipeline, not AI answer quality); in-memory database; baselines are our own re-implementations. “0 leaks” in a small test is <b>not</b> proof of zero leakage. The tiny timing shows the gate itself is cheap; it is not end-to-end latency with a real model.</div>
+
+<h2>D3 · Real-document test (the one that mattered most)</h2>
+<p>Full report: <code>docs/REAL_DOCUMENT_TEST.md</code>. We downloaded six real public documents and tested the <b>live LinuxONE app with the real Groq model</b> as six users.</p>
+<table><tr><th style="width:36%">Document (who may read)</th><th style="width:16%">Format</th><th>Notes</th></tr>
+<tr><td>US Dept of Labor FMLA Fact Sheet #28 (HR)</td><td>PDF</td><td>Copy hosted by U. Michigan</td></tr>
+<tr><td>Univ. of North Texas leave-of-absence policy (HR)</td><td>PDF</td><td>Policy 05.069</td></tr>
+<tr><td>OSHA “Workers’ Rights” 3021 (everyone)</td><td>PDF</td><td>Custom fonts: <code>pypdf</code> returned gibberish → fixed with <code>pdfminer</code> fallback</td></tr>
+<tr><td>IRS Publication 463, travel and car expenses (Finance)</td><td>PDF</td><td>1.8 MB, 296,000 characters, 558 chunks</td></tr>
+<tr><td>Washington State travel policies (Finance)</td><td>DOCX</td><td>Content in a table: first read as 36 characters → fixed</td></tr>
+<tr><td>Apache License 2.0 (Legal)</td><td>TXT</td><td>—</td></tr></table>
+<h4>Result after fixes</h4>
+<ul><li><b>6 questions × 6 users:</b> authorized users got the correct, correctly cited answer <b>15 / 15</b> (it was 8 / 15 before the fixes); unauthorized attempts released nothing, named no restricted document and leaked no content <b>21 / 21</b>.</li>
+<li><b>Passed live:</b> revocation with a cached answer; personal deny beats a role; new document version cited and old cache not served; role change clears cache; outage fails closed; revoke during generation; PII redaction on real phone numbers (HR exempt); 12 parallel requests with no cross-user leakage; document lists match each user’s ACL exactly; restricted passage looks the same as “does not exist”; admin cannot read HR/Finance/Legal; 403/401 checks; bad uploads rejected (415, 422, 413); diary verified after about 300 entries.</li></ul>
+<h4>The eight bugs real documents exposed (all fixed, all covered by tests)</h4>
+<table><tr><th style="width:4%">#</th><th style="width:44%">Problem</th><th>Fix</th></tr>
+<tr><td>1</td><td>DOCX tables ignored</td><td>Read tables, links, content controls in order.</td></tr>
+<tr><td>2</td><td>Garbled PDF text silently indexed</td><td>Quality score, <code>pdfminer</code> fallback, drop unreadable chunks, refuse mostly-unreadable files.</td></tr>
+<tr><td>3</td><td>ML injection classifier flagged 28–34% of ordinary real chunks</td><td>More normal-text training data; thresholds 0.85 / 0.90 calibrated on one document, verified on four others → 10 of 667 flagged, 0 quarantined.</td></tr>
+<tr><td>4</td><td>Rule <code>system:</code> matched “Payment System: …”</td><td>Rule now needs line start or a bracket.</td></tr>
+<tr><td>5</td><td>Search missed the answer (found in top 4 only 8 of 12 times)</td><td>BM25 + similarity, 6 passages, chunk overlap → 12 of 12.</td></tr>
+<tr><td>6</td><td>Correct answers blocked when the AI’s citation format varied</td><td>Accept several formats; one citation-reminder retry; still blocked if uncited.</td></tr>
+<tr><td>7</td><td>Groq rate-limit errors gave no detail</td><td>Retries with back-off; HTTP code in the message.</td></tr>
+<tr><td>8</td><td>Whole chunk quarantined, losing nearby legitimate text</td><td>Remove only the attack sentences.</td></tr></table>
+
+<h2>D4 · Injection detection on an independent public benchmark</h2>
+<p>Data: <code>deepset/prompt-injections</code> (Apache-2.0). We tuned on its <b>train</b> split only, then ran the <b>test</b> split once (116 prompts: 60 attacks, 56 normal).</p>
+<table><tr><th style="width:42%">Detector</th><th style="width:30%">Attacks caught (all / English / German)</th><th>False alarms on 56 normal prompts</th></tr>
+<tr><td>Rules only</td><td>15% / 24% / 0%</td><td>0</td></tr>
+<tr><td><b>Rules + ML (what we ship)</b></td><td><b>20% / 32% / 0%</b></td><td><b>0</b></td></tr></table>
+<p>Our first score of 16 out of 16 came from 16 sentences <i>we</i> wrote, and we adjusted the rules after seeing misses, so it was optimistic. <b>The detector is a helper and misses most real attacks.</b> What actually protects documents is the design: permissions before the AI, documents treated as data, no tools, the Last Check. In our live test, a German attack sentence slipped through and reached the AI, and the AI did not obey it — but we cannot promise that always happens.</p>
+
+<h2>D5 · IBM’s Jupyter AI/ML lab (mandatory lab)</h2>
+<p>Run on our instance with IBM’s container (outputs saved in <code>evidence/</code>; summary in <code>docs/IBM_LAB_EVIDENCE.md</code>). All four notebooks ran with no error.</p>
+<table><tr><th style="width:28%">Notebook</th><th style="width:11%">Time</th><th>Result as printed by the notebook</th></tr>
+<tr><td>Client churn (scikit-learn / PyTorch)</td><td>13 s</td><td>4,800 train / 1,201 test customers; test accuracy ended near 73% (peak about 79%).</td></tr>
+<tr><td>Fraud detection LSTM (Keras/TensorFlow)</td><td>102 s</td><td>TP=3 FP=5 FN=0 TN=1992 (precision 0.375, recall 1.0); exported ONNX; printed inference speed about 4,833 sequences/s.</td></tr>
+<tr><td>MNIST digits → ONNX</td><td>28 s</td><td>Exported model; printed inference speed about 217,736 images/s.</td></tr>
+<tr><td>Loan approval (ML + RAG + Granite via llama.cpp)</td><td>68 s</td><td>Risk model P(low risk) 0.997 → “Approve” with a written reason.</td></tr></table>
+<p>Our own check of the hardware: machine type 9175 (IBM z17) and the CPU flag <code>nnpa</code> (the Telum II AI accelerator) are present. The speed numbers above were printed by IBM’s notebooks; we did not measure them independently. <b>Our own models do not use the accelerator.</b></p>
+
+<h2>D6 · How good are our on-server ML models?</h2>
+<table><tr><th style="width:30%">Model</th><th>Measured</th></tr>
+<tr><td>Department prediction</td><td>6 of 6 real documents correct, but confidence only 0.28–0.73. 8 of 9 on our synthetic seed documents.</td></tr>
+<tr><td>Sensitivity prediction</td><td>Unreliable on real documents (e.g. the Apache license guessed “restricted”). Treat as a hint.</td></tr>
+<tr><td>Injection classifier</td><td>See D4. About 1.5% of ordinary real chunks flagged; none quarantined.</td></tr>
+<tr><td>Behaviour (anomaly) model</td><td>A simulated probing burst scores 100 (“high”). Under heavy automated test traffic <i>everyone</i> scores high: it is rate-based and trained on synthetic baselines. A demo, not a calibrated detector.</td></tr></table>
+
+<h2>D7 · What is weak or missing (say these before a judge asks)</h2>
+<table><tr><th style="width:4%">#</th><th style="width:34%">Limit</th><th>What it means</th></tr>
+<tr><td>1</td><td><b>The AI service sees allowed text</b></td><td>Passages a user may read are sent to Groq on the internet. Forbidden passages never are. A fully closed setup (model on the server) is planned.</td></tr>
+<tr><td>2</td><td>Injection detector is weak</td><td>About 20% on a public benchmark; 0% German; the design is the real defence.</td></tr>
+<tr><td>3</td><td>Quantum-safe security not built</td><td>The track mentions it. We have not implemented it.</td></tr>
+<tr><td>4</td><td>Z hardware not used by our models</td><td>The app runs <i>on</i> IBM Z; our scikit-learn models run on the CPU, not the AI accelerator.</td></tr>
+<tr><td>5</td><td>Search is word-based</td><td>No neural embeddings. Works on our real documents (12/12 in top 6) but the test is small.</td></tr>
+<tr><td>6</td><td>One server, one SQLite file</td><td>No clustering, no backups, in-process lock. Fine for a prototype, not for production.</td></tr>
+<tr><td>7</td><td>Demo-grade login</td><td>Shared demo password, no SSO or MFA, port 8000 open on the internet during the event.</td></tr>
+<tr><td>8</td><td>No OCR</td><td>Scanned image-only PDFs are refused.</td></tr>
+<tr><td>9</td><td>Small, partly synthetic tests</td><td>Six real public documents (not confidential data), six users, one model run; the AI’s answers can vary, and Groq can rate-limit.</td></tr>
+<tr><td>10</td><td>Diary is tamper-<i>evident</i></td><td>Not tamper-proof: whoever owns the database file could rewrite all of it.</td></tr>
+<tr><td>11</td><td>Novelty not checked</td><td>We did no literature or prior-art review, so we do <b>not</b> claim the combination is new.</td></tr></table>
+
+<h2>D8 · Next steps</h2>
+<ol><li>Run a model on the server (IBM Granite through llama.cpp) so no text leaves the machine.</li>
+<li>Move inference to an ONNX/TensorFlow path that can use the Z AI accelerator.</li>
+<li>Neural embeddings; multilingual injection detector with a proper held-out benchmark.</li>
+<li>Scanned-PDF support (OCR).</li>
+<li>A real database with replication, a separate authorization service, SSO and MFA.</li>
+<li>Quantum-safe TLS and publishing the diary’s latest hash outside the database.</li></ol>

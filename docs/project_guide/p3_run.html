@@ -1,0 +1,98 @@
+<div class="part-kicker" style="break-before:page">Part C</div>
+<h1 class="part" style="break-before:avoid">Running it</h1>
+
+<h2>C1 · Run it on your own laptop</h2>
+<p>You need Python 3.12 or newer and Node 20 or newer. The database file is created and filled with demo data automatically on first start.</p>
+<pre><code>git clone https://github.com/Aadithyaar22/VaultRAG.git && cd VaultRAG
+cp .env.example .env            # then edit .env (see below)
+cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cd ../frontend && npm install && npm run build     # the server serves frontend/dist
+cd ../backend && .venv/bin/uvicorn app.main:app --port 8000
+# open http://localhost:8000   (log in as hannah / demo-pass, or click a demo card)</code></pre>
+<p><b>Choose how the AI answers</b> in <code>.env</code>:</p>
+<ul><li><b>No internet / no key:</b> <code>LLM_PROVIDER=extractive</code> (returns matching sentences; clearly labelled “non-generative”).</li>
+<li><b>Real AI:</b> keep <code>LLM_PROVIDER=openai_compatible</code> and put your own Groq key in <code>LLM_API_KEY=</code>. The default model is <code>openai/gpt-oss-120b</code>; older Groq models may have been retired, so if you get “HTTP 400/404” check the model name.</li></ul>
+<p><b>Developer mode:</b> run <code>npm run dev</code> in <code>frontend/</code> and open http://localhost:5173 (it forwards <code>/api</code> to port 8000). <b>Tests:</b> <code>cd backend && .venv/bin/python -m pytest -q</code> → 42 tests.</p>
+<p><b>Docker:</b> <code>docker compose up --build</code> (a Dockerfile and compose file are in the repo; we have not tested them on the LinuxONE server).</p>
+<div class="note"><b class="t">Important</b>Never commit <code>.env</code>, <code>*.pem</code> keys, or the <code>data/</code> folder. They are already in <code>.gitignore</code>. A leaked API key must be revoked, not just deleted from the repo.</div>
+
+<h2>C2 · The LinuxONE server</h2>
+<table><tr><th style="width:30%">Item</th><th>Value</th></tr>
+<tr><td>Address</td><td><b>148.100.99.19</b> (instance name <i>hacktivists</i>)</td></tr>
+<tr><td>Login</td><td>SSH as <code>linux1</code> with a private key file (<code>hacktivists.pem</code>, kept only on the team lead’s Mac in the <code>keys/</code> folder; <b>never in git, never in chat</b>). Passwords and root login are disabled by IBM. <code>sudo</code> works.</td></tr>
+<tr><td>Machine</td><td>IBM z17 (machine type 9175), architecture s390x (big-endian), Ubuntu 24.04.5, 3 virtual CPUs, about 7.8 GB RAM, 50 GB disk. The CPU reports the <code>nnpa</code> AI-accelerator feature (our own models do not use it).</td></tr>
+<tr><td>The app</td><td>Folder <code>~/vaultrag</code> (copied with rsync; there is no git repository on the server). Python virtual environment at <code>~/vaultrag/backend/.venv</code> (it can also see Ubuntu’s scikit-learn packages).</td></tr>
+<tr><td>Settings / secrets</td><td><code>~/vaultrag/.env</code> (permissions 600): signing secret, Groq key, <code>LLM_MODEL</code>, <code>DEMO_MODE</code>.</td></tr>
+<tr><td>Database</td><td><code>~/vaultrag/backend/data/vaultrag.db</code></td></tr>
+<tr><td>Service</td><td>systemd unit <code>vaultrag</code> (<code>/etc/systemd/system/vaultrag.service</code>): runs <code>uvicorn app.main:app --host 0.0.0.0 --port 8000</code> as user <code>linux1</code>, restarts automatically, starts at boot.</td></tr>
+<tr><td>Firewall</td><td>Open: 22 (SSH) and <b>8000</b> (the app). Saved in <code>/etc/iptables/rules.v4</code>. Port 38888 (Jupyter) is <b>closed</b>.</td></tr>
+<tr><td>Extra software installed</td><td>apt: <code>python3-venv</code>, <code>build-essential</code>, <code>libxml2-dev</code>, <code>libxslt1-dev</code> (to compile <code>lxml</code>, which has no s390x download), <code>python3-sklearn</code> (+ numpy, scipy, joblib), <code>docker.io</code>. pip: the requirements file plus <code>pdfminer.six</code> and <code>fonttools</code>.</td></tr>
+<tr><td>IBM Jupyter lab</td><td>Docker container <code>notebook</code> from IBM’s image <code>registry.linuxone.cloud.marist.edu/l1cc/jupyterlab-image-s390x</code>, port 38888, strong random token (stored locally in <code>keys/jupyter_token.txt</code>), not exposed. The four IBM notebooks were run and their outputs saved in <code>evidence/</code>.</td></tr></table>
+<div class="fig">
+<svg viewBox="0 0 760 120" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, sans-serif"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#17150f"/></marker></defs>
+<g font-size="10.4" text-anchor="middle"><rect x="4" y="26" width="150" height="66" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="79" y="52" font-weight="700">Visitor / judge</text><text x="79" y="68" fill="#4a463c">browser →</text><text x="79" y="81" fill="#4a463c">http://148.100.99.19:8000</text>
+<rect x="206" y="26" width="150" height="66" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="281" y="52" font-weight="700">Team lead / dev</text><text x="281" y="68" fill="#4a463c">ssh -i key.pem</text><text x="281" y="81" fill="#4a463c">linux1@148.100.99.19</text>
+<rect x="420" y="10" width="170" height="98" rx="9" fill="#17150f"/><text x="505" y="32" font-weight="700" fill="#f6f0df">Firewall</text><text x="505" y="50" fill="#d9d1bb">22 open · 8000 open</text><text x="505" y="64" fill="#d9d1bb">38888 closed</text><text x="505" y="86" fill="#f6f0df" font-style="italic">→ systemd "vaultrag"</text>
+<rect x="630" y="26" width="126" height="66" rx="9" fill="#f6f0df" stroke="#17150f"/><text x="693" y="52" font-weight="700">App + SQLite</text><text x="693" y="68" fill="#4a463c">+ ML models</text><text x="693" y="81" fill="#4a463c">+ Docker Jupyter</text></g>
+<g stroke="#17150f" stroke-width="1.5" marker-end="url(#a)"><line x1="156" y1="59" x2="418" y2="59"/><line x1="358" y1="59" x2="418" y2="70"/><line x1="592" y1="59" x2="628" y2="59"/></g></svg>
+<div class="cap">Figure 6 — How people reach the server.</div></div>
+
+<h2>C3 · Everyday operations (copy and paste)</h2>
+<p>In the commands below, replace <code>KEY</code> with the path to the private key file and run from the repository folder on your laptop.</p>
+<table><tr><th style="width:27%">I want to…</th><th>Command</th></tr>
+<tr><td>Log in to the server</td><td><code>ssh -i KEY linux1@148.100.99.19</code></td></tr>
+<tr><td>See if the app is running</td><td><code>ssh -i KEY linux1@148.100.99.19 'systemctl is-active vaultrag; curl -s localhost:8000/api/health'</code></td></tr>
+<tr><td>Read the app log</td><td><code>ssh -i KEY linux1@148.100.99.19 'journalctl -u vaultrag -n 80 --no-pager'</code></td></tr>
+<tr><td>Restart the app</td><td><code>ssh -i KEY linux1@148.100.99.19 'sudo systemctl restart vaultrag'</code></td></tr>
+<tr><td>Deploy new code</td><td>1) <code>cd frontend && npm run build</code> 2) <code>rsync -az --exclude __pycache__ -e "ssh -i KEY" backend/app backend/requirements.txt backend/tests linux1@148.100.99.19:~/vaultrag/backend/</code> 3) <code>rsync -az --delete -e "ssh -i KEY" frontend/dist/ linux1@148.100.99.19:~/vaultrag/frontend/dist/</code> 4) restart (above). Do <b>not</b> rsync <code>.env</code> or <code>data/</code>.</td></tr>
+<tr><td>Run the tests on the server</td><td><code>ssh -i KEY linux1@148.100.99.19 'cd ~/vaultrag/backend &amp;&amp; .venv/bin/python -m pytest -q'</code></td></tr>
+<tr><td>Open the app through a secure tunnel (and Jupyter)</td><td><code>ssh -N -i KEY -L 8001:127.0.0.1:8000 -L 38888:127.0.0.1:38888 linux1@148.100.99.19</code> — leave it running, then open http://localhost:8001 and http://localhost:38888 (Jupyter token is in <code>keys/jupyter_token.txt</code>).</td></tr>
+<tr><td>Reset demo data</td><td>Demo Controls → <b>Reset demo data</b> (as adam). It deletes everything, including uploaded files and the diary.</td></tr>
+<tr><td>Change the AI key or model</td><td>Edit <code>~/vaultrag/.env</code> on the server, then restart. Never paste the key into chat or a file in git.</td></tr>
+<tr><td>Close the public port</td><td><code>sudo iptables -D INPUT -p tcp --dport 8000 -j ACCEPT &amp;&amp; sudo bash -c "iptables-save &gt; /etc/iptables/rules.v4"</code></td></tr>
+<tr><td>Turn demo mode off</td><td><code>sed -i 's/^DEMO_MODE=.*/DEMO_MODE=false/' ~/vaultrag/.env</code> then restart.</td></tr>
+<tr><td>Stop the app completely</td><td><code>sudo systemctl disable --now vaultrag</code></td></tr></table>
+<div class="warn"><b class="t">Two traps we already fell into</b>1) <code>pkill -f "uvicorn app.main"</code> typed inside an <code>ssh '…'</code> command also matches the SSH shell itself and kills your session. Use <code>sudo systemctl restart vaultrag</code> instead. 2) A background process started from an SSH command dies when the session ends; the systemd service avoids this.</div>
+
+<h2>C4 · After judging: lock it down</h2>
+<ol><li>Close port 8000 (command above).</li><li>Turn <code>DEMO_MODE</code> off and restart.</li><li>Change the demo passwords: run on the server, from <code>~/vaultrag/backend</code>, a short Python snippet that calls <code>auth.hash_password()</code> and updates <code>users.password_hash</code> (ask the team lead; the passwords must be typed by a person, not saved in a file).</li><li><b>Revoke the Groq key</b> in the Groq console (it was pasted into a chat once).</li><li>Delete the unused local key pair <code>keys/linuxone_key*</code>.</li></ol>
+
+<h2>C5 · Building the server from nothing (hand-over)</h2>
+<ol>
+<li>Create the instance in the LinuxONE portal (Ubuntu 24.04), import your SSH public key, note the address.</li>
+<li><code>sudo apt-get install -y python3-venv python3-pip build-essential python3-dev libxml2-dev libxslt1-dev python3-sklearn python3-numpy python3-scipy python3-joblib</code></li>
+<li>Copy the project: <code>rsync</code> the repository to <code>~/vaultrag</code> (without <code>.git</code>, <code>.venv</code>, <code>node_modules</code>, <code>.env</code>).</li>
+<li><code>cd ~/vaultrag/backend &amp;&amp; python3 -m venv .venv</code>, then set <code>include-system-site-packages = true</code> in <code>.venv/pyvenv.cfg</code> (so the venv sees the Ubuntu scikit-learn), then <code>.venv/bin/pip install -r requirements.txt</code>. (There is no scikit-learn download for s390x, which is why it comes from apt.)</li>
+<li>Create <code>~/vaultrag/.env</code> (<code>chmod 600</code>) from <code>.env.example</code>: a random <code>VAULTRAG_SECRET</code>, <code>LLM_PROVIDER</code>, key and model.</li>
+<li>Create the systemd unit (run as <code>linux1</code>, working directory <code>backend/</code>, <code>ExecStart=.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000</code>, <code>Restart=always</code>), then <code>systemctl enable --now vaultrag</code>.</li>
+<li>Open the port: <code>sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT</code> and save with <code>iptables-save &gt; /etc/iptables/rules.v4</code>.</li>
+<li>Check: <code>curl http://localhost:8000/api/health</code> should show <code>"ml_available":true</code>.</li></ol>
+
+<h2>C6 · The demo, step by step (about 4 minutes)</h2>
+<table><tr><th style="width:5%">#</th><th style="width:30%">Do this</th><th>Say / point out</th></tr>
+<tr><td>1</td><td>Landing page → <b>Sign in</b> → card <i>Hannah HR</i>.</td><td>“Roles decide what you can read. Home explains every menu.”</td></tr>
+<tr><td>2</td><td>Secure Chat → “How many weeks of paid parental leave do primary caregivers receive?”</td><td>Cited answer, version, badge <i>Released by security gate</i>. Open the source passage.</td></tr>
+<tr><td>3</td><td>Sign out → sign in as <i>Alice</i> → same question.</td><td>Nothing found: no HR text, no title shown. Vault lists only the handbook.</td></tr>
+<tr><td>4</td><td>As Hannah again → ask once more.</td><td>Badge <i>cache: hit revalidated</i> — the saved answer was re-checked first.</td></tr>
+<tr><td>5</td><td>As <i>Adam</i> (private window to keep Hannah signed in) → Document Vault → untick <b>hr</b> on <i>HR Parental Leave Policy</i>.</td><td>“Access removed while she is logged in.”</td></tr>
+<tr><td>6</td><td>Hannah asks again.</td><td>The old answer is <b>not</b> shown. Security Center: <code>permission_changed</code>, <code>cache_invalidated</code>.</td></tr>
+<tr><td>7</td><td>Demo Controls → <b>Revoke during generation</b>.</td><td>The trace shows the answer was written, access removed, the Last Check caught it, answer discarded.</td></tr>
+<tr><td>8</td><td>Demo Controls → Authorization outage ON → ask → OFF.</td><td>Even saved answers are refused: <i>fails closed</i>.</td></tr>
+<tr><td>9</td><td>Demo Controls → <b>Upload poisoned document</b>; ask Alice about supplier payment.</td><td>Command sentence removed; the real sentence still answered.</td></tr>
+<tr><td>10</td><td>Demo Controls → <b>Simulate probing</b> → Security Center.</td><td>Risk score jumps; the models card shows <i>s390x</i>. Click <b>Verify hash chain</b>.</td></tr></table>
+<p>Reset the demo data before every recording or presentation. The 3-minute video plan is in <code>submission/04_video_script.md</code>.</p>
+
+<h2>C7 · Troubleshooting</h2>
+<table><tr><th style="width:34%">Symptom</th><th>Likely cause → fix</th></tr>
+<tr><td>Browser says “Website not available” (a Sophos page)</td><td>The venue network blocks raw-IP sites. Use the SSH tunnel (C3) and open <code>localhost:8001</code>. Also check you typed <code>http://</code> and <code>:8000</code>.</td></tr>
+<tr><td>Browser says “Not secure”</td><td>Normal: the site uses plain HTTP, no certificate.</td></tr>
+<tr><td>Chat shows “model not configured”</td><td>No <code>LLM_API_KEY</code>. Set it, or use <code>LLM_PROVIDER=extractive</code>.</td></tr>
+<tr><td>Chat shows “model request failed after retries (HTTP 4xx/5xx)”</td><td>Groq rate limit or a wrong model name. Wait a minute; check the HTTP code in the message; check <code>LLM_MODEL</code>.</td></tr>
+<tr><td>Answers say “nothing I may share” for a user who should have access</td><td>Check the document’s roles in Document Vault and any personal deny; check that the user has the role (Users &amp; Roles). It is working as designed if the role is missing.</td></tr>
+<tr><td>A correct answer is blocked (<code>uncited_answer</code>)</td><td>The AI answered without citing a source twice. Ask again; if it repeats, look at <code>llm.py</code> prompt.</td></tr>
+<tr><td>Upload fails with 422 “unreadable text”</td><td>The PDF is scanned images or uses odd fonts we cannot read. Upload a text-based version.</td></tr>
+<tr><td>Everyone shows “high” risk</td><td>Many automated test questions in 10 minutes. The detector is rate-based; reset or wait.</td></tr>
+<tr><td>Background does not move</td><td>The computer has <b>Reduce motion</b> on (System Settings → Accessibility → Display). The pointer still moves it a little.</td></tr>
+<tr><td>Server not answering</td><td>If the instance does not reply to ping or SSH, stop and start it in the LinuxONE portal (Manage Instances).</td></tr>
+<tr><td>Disk filling up</td><td>The IBM Jupyter image is about 10 GB. <code>docker images</code>; remove unused images.</td></tr>
+<tr><td>Tests fail after changing retrieval or permissions</td><td>Read the failing test name: the security tests (<code>test_security.py</code>) describe the rule that was broken.</td></tr></table>

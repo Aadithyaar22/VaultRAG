@@ -1,0 +1,13 @@
+<svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, sans-serif">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#17150f"/></marker></defs>
+<g font-size="10" text-anchor="middle">
+<rect x="4" y="30" width="86" height="76" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="47" y="52" font-weight="700">Upload</text><text x="47" y="68" fill="#4a463c">PDF/DOCX/TXT</text><text x="47" y="81" fill="#4a463c">≤ 10 MB, admin</text>
+<rect x="104" y="30" width="96" height="76" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="152" y="52" font-weight="700">Read text</text><text x="152" y="68" fill="#4a463c">pypdf, then</text><text x="152" y="81" fill="#4a463c">pdfminer if garbled</text>
+<rect x="214" y="30" width="96" height="76" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="262" y="52" font-weight="700">Quality check</text><text x="262" y="68" fill="#4a463c">drop unreadable</text><text x="262" y="81" fill="#4a463c">pieces, or refuse</text>
+<rect x="324" y="30" width="96" height="76" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="372" y="52" font-weight="700">Cut in pieces</text><text x="372" y="68" fill="#4a463c">~600 characters,</text><text x="372" y="81" fill="#4a463c">140 overlap</text>
+<rect x="434" y="30" width="104" height="76" rx="9" fill="#17150f"/><text x="486" y="52" font-weight="700" fill="#f6f0df">Clean attacks</text><text x="486" y="68" fill="#d9d1bb">remove sentences</text><text x="486" y="81" fill="#d9d1bb">that give orders</text>
+<rect x="552" y="30" width="96" height="76" rx="9" fill="#faf7ee" stroke="#17150f"/><text x="600" y="52" font-weight="700">Make vectors</text><text x="600" y="68" fill="#4a463c">for search; count</text><text x="600" y="81" fill="#4a463c">personal data</text>
+<rect x="662" y="30" width="94" height="76" rx="9" fill="#f6f0df" stroke="#17150f"/><text x="709" y="52" font-weight="700">Save</text><text x="709" y="68" fill="#4a463c">version, ACL,</text><text x="709" y="81" fill="#4a463c">diary entry; clear</text><text x="709" y="94" fill="#4a463c">related caches</text></g>
+<g stroke="#17150f" stroke-width="1.4" marker-end="url(#a)"><line x1="92" y1="68" x2="102" y2="68"/><line x1="202" y1="68" x2="212" y2="68"/><line x1="312" y1="68" x2="322" y2="68"/><line x1="422" y1="68" x2="432" y2="68"/><line x1="540" y1="68" x2="550" y2="68"/><line x1="650" y1="68" x2="660" y2="68"/></g>
+<text x="380" y="136" font-size="10" text-anchor="middle" font-style="italic" fill="#4a463c">In parallel: the ML model suggests department + sensitivity and warns if the chosen roles look too wide.</text>
+</svg>

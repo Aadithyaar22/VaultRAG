@@ -1,0 +1,66 @@
+<div class="part-kicker" style="break-before:page">Part E</div>
+<h1 class="part" style="break-before:avoid">Reference</h1>
+
+<h2>E1 · Hackathon rules that matter to us</h2>
+<p>Source: the official IBM Z Datathon 2026 rules (<code>docs/RULES.md</code> has the full summary).</p>
+<table><tr><th style="width:27%">Topic</th><th>Rule</th></tr>
+<tr><td>Dates (India time)</td><td>16 Oct 7:30 PM: LinuxONE set-up session. 17 Oct 9–10 AM: kick-off. 24-hour build on 17–18 Oct. <b>Submission form closes 18 Oct 2026, 10:00 PM IST.</b> Winners’ showcase 18 Nov.</td></tr>
+<tr><td>Team</td><td>4–6 students, 18+, enrolled; each person in one team; registered on Hack2Skill.</td></tr>
+<tr><td>Originality</td><td>Everything built <b>during</b> the event. No code or ideas from other teams or outside projects. Open-source libraries are fine <b>if linked</b> and licensed correctly.</td></tr>
+<tr><td>Tracks</td><td>Real-Time AI for Critical Decisions · <b>AI Secured: Innovation Without Exposure (ours)</b> · Wildcard.</td></tr>
+<tr><td>Judging (40 points)</td><td>1) Value to community / theme fit. 2) Novelty and originality. 3) Technical design and use of <b>LinuxONE + open-source AI/ML</b> (two mandatory labs first; <b>screenshots as evidence</b>). 4) Execution and delivery (clear 3-minute video). Extra 20-point rubric for the AI Innovation Excellence award.</td></tr>
+<tr><td>Content and conduct</td><td>No hate, no political messaging, respectful. Organisers can expel teams that break the rules.</td></tr>
+<tr><td>IP</td><td>Participants keep ownership of their solution; organisers may promote entries.</td></tr>
+<tr><td>Prizes</td><td>Each in-person hub: $1,000 / $750 / $500; plus regional and AI Innovation awards; winners get 6 months of extended LinuxONE access and a feature at IBM Z Day.</td></tr></table>
+
+<h2>E2 · What goes into the submission form</h2>
+<table><tr><th style="width:36%">Field</th><th style="width:16%">Status</th><th>Where it is</th></tr>
+<tr><td>Challenge (track)</td><td>ready</td><td>AI Secured: Innovation Without Exposure</td></tr>
+<tr><td>Problem · How we solve it · How we use IBM Z · Value (each ≤ 1,024 characters)</td><td>ready</td><td><code>SUBMISSION/03_form_answers.md</code> (lengths checked)</td></tr>
+<tr><td>Pitch deck (PDF, ≤ 5 MB)</td><td>ready</td><td><code>SUBMISSION/01_pitch_deck.pdf</code></td></tr>
+<tr><td>GitHub link (public)</td><td>ready</td><td>https://github.com/Aadithyaar22/VaultRAG</td></tr>
+<tr><td>Video link (YouTube/Vimeo, ≤ 3 min)</td><td><b>to record</b></td><td>Script and shot list: <code>SUBMISSION/04_video_script.md</code></td></tr>
+<tr><td>Open-source links</td><td>ready</td><td><code>SUBMISSION/06_open_source_links.md</code></td></tr>
+<tr><td>Other document (architecture)</td><td>ready</td><td><code>SUBMISSION/02_architecture_diagram.png</code> (also in the repo)</td></tr>
+<tr><td>Project title</td><td>ready</td><td><b>Hacktivists_IBM Z Datathon 2026 Project</b></td></tr></table>
+<p><b>Before pressing Submit:</b> open every link in a private browser window and confirm it opens without asking for access; check the video is Public or Unlisted and under 3:00; check the repository shows no <code>.env</code> or key files; confirm every teammate is registered on Hack2Skill.</p>
+
+<h2>E3 · Questions judges may ask, and honest answers</h2>
+<table><tr><th style="width:34%">Question</th><th>Answer</th></tr>
+<tr><td>How is this different from ordinary role-based access in a vector database?</td><td>Filtering at search time is not enough: saved answers and in-flight answers can outlive a permission change. We attach every answer to the exact document and permission versions it used and re-check them at release time, and we never trust the vector store’s filter alone — the database decides.</td></tr>
+<tr><td>Is it novel?</td><td>We have not done a prior-art review, so we do not claim novelty. We claim a working, tested combination of known ideas with a specific “release-time re-validation” design.</td></tr>
+<tr><td>What stops a poisoned document from hijacking the AI?</td><td>Mainly the design: the AI has no tools, sees only documents the user may read, treats them as data, and cannot read other documents anyway. On top, we remove attack-like sentences. The detector itself is weak (about 20% on a public benchmark).</td></tr>
+<tr><td>Does any data leave the server?</td><td>Yes — the allowed passages go to Groq to write the answer. Forbidden passages never do. A server-side model is the planned fix; the code already supports switching the provider.</td></tr>
+<tr><td>How do you use IBM Z?</td><td>The app, tests and our ML models run on a LinuxONE z17 (s390x); we ran IBM’s AI/ML lab there. The Z AI accelerator and hardware encryption are planned, not used.</td></tr>
+<tr><td>Quantum-safe?</td><td>Not implemented. It is on the roadmap.</td></tr>
+<tr><td>What if the AI makes things up?</td><td>It must cite numbered evidence; answers without a valid citation are blocked; if the evidence does not answer, it must say so and we show “nothing I may share”. We cannot guarantee the wording is always right.</td></tr>
+<tr><td>What happens if the permission check fails or is down?</td><td>The answer is blocked, even saved ones. We prove this with a demo button and a test.</td></tr>
+<tr><td>How did you test it?</td><td>42 automated tests; a benchmark against two baselines; a live test with six real documents across six roles; an independent public injection benchmark. Reports are in the repo, including the failures we found.</td></tr>
+<tr><td>Will it scale?</td><td>Not as built: one node and SQLite. The permission logic does not depend on that; the storage would move to a replicated database and a separate authorization service.</td></tr>
+<tr><td>Why does the administrator not see everything?</td><td>Managing documents and reading them are different powers. Separating them reduces insider risk.</td></tr></table>
+
+<h2>E4 · Team FAQ</h2>
+<table><tr><th style="width:36%">Question</th><th>Answer</th></tr>
+<tr><td>Who has the server key?</td><td>Only the team lead. Share it privately if someone must log in; never in git or chat. Ask the lead to run server commands if unsure.</td></tr>
+<tr><td>Can I open the live site?</td><td>Yes: http://148.100.99.19:8000 (type the <code>http://</code> and <code>:8000</code>). Use the demo cards; password <code>demo-pass</code>.</td></tr>
+<tr><td>I changed the code. How do I get it on the server?</td><td>Build the frontend, rsync, restart (C3). Run the tests first.</td></tr>
+<tr><td>The demo looks broken or cluttered.</td><td>Demo Controls → Reset demo data.</td></tr>
+<tr><td>Where are the test reports?</td><td><code>docs/REAL_DOCUMENT_TEST.md</code>, <code>docs/BENCHMARK.md</code>, <code>docs/IBM_LAB_EVIDENCE.md</code>.</td></tr>
+<tr><td>Can I add a document type or a role?</td><td>Types: <code>extract.py</code>. Roles: the list in <code>documents.py</code> (<code>ROLES</code>) and the user interface lists; add tests for permissions.</td></tr>
+<tr><td>Can I use a different AI provider?</td><td>Set <code>LLM_BASE_URL</code>, <code>LLM_MODEL</code>, <code>LLM_API_KEY</code> to any OpenAI-compatible service.</td></tr></table>
+
+<h2>E5 · File map (what to open)</h2>
+<table><tr><th style="width:40%">File or folder</th><th>Use it for</th></tr>
+<tr><td><code>README.md</code></td><td>Short overview, quick start, honest status list.</td></tr>
+<tr><td><code>docs/PROJECT_GUIDE.pdf</code></td><td>This guide.</td></tr>
+<tr><td><code>docs/REAL_DOCUMENT_TEST.md</code></td><td>Real-document test: method, bugs, numbers, limits, how to reproduce.</td></tr>
+<tr><td><code>docs/BENCHMARK.md</code>, <code>BENCHMARK_s390x.md</code></td><td>Synthetic benchmark on the Mac and on the LinuxONE server.</td></tr>
+<tr><td><code>docs/IBM_LAB_EVIDENCE.md</code></td><td>The mandatory IBM lab: steps, hardware check, results.</td></tr>
+<tr><td><code>submission/</code> and the team <code>SUBMISSION/</code> folder</td><td>Final deck, diagram, form answers, video script, checklist.</td></tr>
+<tr><td><code>backend/scripts/real_docs/</code></td><td>Scripts to repeat the real-document tests (download script included; the documents are not stored in git).</td></tr>
+<tr><td>Team folder <code>evidence/</code> (not in git)</td><td>Executed IBM notebooks and their logs.</td></tr>
+<tr><td>Team folder <code>keys/</code> (<b>never share, never commit</b>)</td><td>Server key and Jupyter token.</td></tr></table>
+
+<h2>E6 · Open-source software we use</h2>
+<p>FastAPI, Uvicorn, Pydantic, pydantic-settings, python-multipart, pypdf, pdfminer.six, python-docx, lxml, httpx, pytest, scikit-learn, fonttools, SQLite, React, Vite, Tailwind CSS, TypeScript. The AI model is <code>openai/gpt-oss-120b</code>, an open-weight model, served by Groq (a hosted service). Public data used only for testing: US government and university documents, the Apache License text, and the <code>deepset/prompt-injections</code> dataset (Apache-2.0).</p>
+<p class="small" style="margin-top:8mm">End of the guide. If something here does not match what you see in the code or on the server, trust the code and tell the team lead so this guide can be fixed.</p>

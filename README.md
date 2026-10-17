@@ -7,6 +7,15 @@ evidence their roles permit. Its core component, the **Revocation-Safe Evidence 
 document versions and ACL versions support every answer, and re-checks authorization immediately before release —
 so a permission revoked mid-session or mid-generation can never be bypassed by a cache or a slow model call.
 
+## Documentation
+| Read this | For |
+|---|---|
+| [`docs/PROJECT_GUIDE.pdf`](docs/PROJECT_GUIDE.pdf) | **Start here (36 pages).** Plain-English explanation first, then architecture, code map, database, every pipeline, API, settings, running and operating the LinuxONE server, tests, limits |
+| [`docs/REAL_DOCUMENT_TEST.md`](docs/REAL_DOCUMENT_TEST.md) | Live test on six real public documents across all roles; bugs found and fixed; independent injection benchmark |
+| [`docs/BENCHMARK.md`](docs/BENCHMARK.md), [`BENCHMARK_s390x.md`](docs/BENCHMARK_s390x.md) | Our benchmark against two baselines (Mac and LinuxONE) |
+| [`docs/IBM_LAB_EVIDENCE.md`](docs/IBM_LAB_EVIDENCE.md) | The mandatory IBM Jupyter AI/ML lab |
+| [`submission/`](submission/) | Hackathon package: pitch deck, architecture diagram, form answers, video script, judge Q&A, open-source list, checklist |
+
 ## Architecture
 
 ```
