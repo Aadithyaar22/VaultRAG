@@ -52,7 +52,7 @@ export default function Chat({ user }: { user: User }) {
       )}
       {turns.map((t, i) => (
         <div key={i} className="grid gap-2">
-          <div className="ml-auto max-w-[85%] rounded-xl bg-brand/20 px-3 py-2 text-sm text-white">{t.q}</div>
+          <div className="ml-auto max-w-[85%] rounded border border-sapphire/40 bg-sapphire/15 px-3 py-2 text-sm text-white">{t.q}</div>
           <Card>
             {!t.r && !t.err && <p className="text-sm text-slate-400" aria-live="polite">Generating, then validating authorization… (nothing is shown until the gate approves)</p>}
             <ErrorNote msg={t.err || null} />
@@ -80,7 +80,7 @@ export default function Chat({ user }: { user: User }) {
       <div ref={end} />
       <form className="sticky bottom-2 flex gap-2" onSubmit={e => { e.preventDefault(); ask(q); }}>
         <input aria-label="Question" value={q} onChange={e => setQ(e.target.value)} maxLength={2000} placeholder="Ask about your documents…"
-          className="flex-1 rounded-lg border border-line bg-panel px-3 py-2.5 text-sm" />
+          className="glow-focus flex-1 rounded border border-panel2 bg-ink px-3 py-2.5 font-mono text-sm placeholder:text-slate-500 focus:border-brand" />
         <Button type="submit" disabled={busy || q.trim().length < 3}>{busy ? "…" : "Ask"}</Button>
       </form>
     </div>

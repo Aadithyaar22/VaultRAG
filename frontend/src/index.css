@@ -1,15 +1,58 @@
 @import "tailwindcss";
 
+/* "Obsidian Cyber Glass" design system (from Stitch DESIGN.md). Fonts degrade to system fonts if the CDN is blocked. */
 @theme {
-  --color-ink: #0b1020;
-  --color-panel: #121a2f;
-  --color-panel2: #18223d;
-  --color-line: #263353;
-  --color-brand: #6d8dff;
-  --color-ok: #34d399;
-  --color-warn: #fbbf24;
-  --color-bad: #f87171;
+  --color-ink: #040711;
+  --color-panel: #080d1a;
+  --color-panel2: #0d1527;
+  --color-line: #1a2745;
+  --color-brand: #00f0ff;
+  --color-sapphire: #3b82f6;
+  --color-violet: #8b5cf6;
+  --color-ok: #10b981;
+  --color-warn: #f59e0b;
+  --color-bad: #ef4444;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
 }
 html, body, #root { height: 100%; }
-body { background: var(--color-ink); color: #dbe4ff; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+body {
+  background-color: var(--color-ink);
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: #dee2f5;
+  font-family: var(--font-sans);
+}
+h1, h2 { font-family: var(--font-display); letter-spacing: -0.01em; }
+code, pre, kbd { font-family: var(--font-mono); }
 :focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+select, input[type="file"] { font-family: var(--font-mono); font-size: 0.8rem; }
+input[type="checkbox"] { accent-color: var(--color-brand); width: 16px; height: 16px; }
+
+/* Glass strata: Level 1 panels, with an etched cyan -> sapphire -> transparent top edge */
+.glass {
+  position: relative;
+  background: rgba(8, 13, 26, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+}
+.glass::before {
+  content: "";
+  position: absolute; inset: 0 0 auto 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.7), rgba(59, 130, 246, 0.5) 45%, transparent);
+}
+.glow-focus:focus { box-shadow: 0 0 0 1px var(--color-brand), 0 0 14px -2px rgba(0, 240, 255, 0.45); outline: none; }
+.glow-cyan:hover { box-shadow: 0 0 20px -4px rgba(0, 240, 255, 0.5); }
+.glow-red:hover { box-shadow: 0 0 24px -2px rgba(239, 68, 68, 0.45); }
+
+@keyframes bead { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.bead { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; animation: bead 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .bead { animation: none; } }

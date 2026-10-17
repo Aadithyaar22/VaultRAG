@@ -23,8 +23,8 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
 
   return (
     <div className="mx-auto flex min-h-full max-w-3xl flex-col justify-center gap-4 p-4">
-      <div><h1 className="text-3xl font-bold text-white">🔐 VaultRAG</h1>
-        <p className="text-slate-400">Ask questions about confidential documents — see only what your role permits, with revocation-safe answers.</p></div>
+      <div><h1 className="text-5xl font-bold text-white">🔐 VaultRAG</h1>
+        <p className="text-slate-200">Ask questions about confidential documents — see only what your role permits, with revocation-safe answers.</p></div>
       <Card title="Sign in">
         <form className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]" onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <Input aria-label="Username" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} autoComplete="username" />
@@ -38,7 +38,7 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
           <div className="grid gap-2 sm:grid-cols-2">
             {demo.map(d => (
               <button key={d.username} onClick={() => submit(d.username, "demo-pass")}
-                className="rounded-lg border border-line p-3 text-left hover:bg-panel2">
+                className="rounded border border-line bg-ink/50 p-3 text-left transition hover:border-brand/60 hover:bg-panel2">
                 <div className="font-semibold text-white">{d.display_name}</div>
                 <div className="mt-1 flex flex-wrap gap-1">{d.roles.map(r => <Badge key={r} tone="info">{r}</Badge>)}</div>
               </button>
