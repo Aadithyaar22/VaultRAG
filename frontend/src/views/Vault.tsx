@@ -13,7 +13,14 @@ export default function Vault({ user }: { user: User }) {
   const [sens, setSens] = useState("internal");
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [sugg, setSugg] = useState<any>(null);
   const manage = user.capabilities.includes("manage_documents");
+  async function onFile(f: File | null) {
+    setFile(f); setSugg(null);
+    if (!f) return;
+    const fd = new FormData(); fd.append("file", f);
+    try { const r = await api("/api/documents/suggest", { form: fd }); if (r.available) setSugg(r.prediction); } catch {}
+  }
   const load = () => api("/api/documents").then(setDocs).catch(e => setErr(e.message));
   useEffect(() => { load(); }, []);
 
@@ -40,12 +47,19 @@ export default function Vault({ user }: { user: User }) {
           <div className="grid gap-2 md:grid-cols-3">
             <Input aria-label="Title" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
             <select aria-label="Sensitivity" className="rounded-lg border border-line bg-ink px-3 py-2 text-sm" value={sens} onChange={e => setSens(e.target.value)}>{SENS.map(s => <option key={s}>{s}</option>)}</select>
-            <input aria-label="File" type="file" accept=".pdf,.txt,.docx" onChange={e => setFile(e.target.files?.[0] || null)} className="text-sm" />
+            <input aria-label="File" type="file" accept=".pdf,.txt,.docx" onChange={e => onFile(e.target.files?.[0] || null)} className="text-sm" />
           </div>
+          {sugg && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-brand/40 bg-brand/10 px-3 py-2 text-sm" role="status">
+              <Badge tone="info">🤖 AI suggestion (on-server model)</Badge>
+              <span>looks like <b>{sugg.department}</b> content ({Math.round(sugg.department_confidence * 100)}%), <b>{sugg.sensitivity}</b> ({Math.round(sugg.sensitivity_confidence * 100)}%) → roles: {sugg.suggested_roles.join(", ")}</span>
+              <Button variant="ghost" onClick={() => { setRoles(sugg.suggested_roles); setSens(sugg.sensitivity); }}>Apply</Button>
+            </div>
+          )}
           <fieldset className="mt-3 flex flex-wrap gap-3 text-sm"><legend className="mb-1 text-xs text-slate-400">Roles allowed to read</legend>
             {ROLES.map(r => <label key={r} className="flex items-center gap-1"><input type="checkbox" checked={roles.includes(r)} onChange={() => setRoles(x => x.includes(r) ? x.filter(y => y !== r) : [...x, r])} />{r}</label>)}</fieldset>
           <Button className="mt-3" disabled={!file || !title || roles.length === 0}
-            onClick={() => run(() => api("/api/documents", { form: form() }), "Uploaded, scanned for injection/PII, and indexed.")}>Upload</Button>
+            onClick={async () => { setErr(null); setMsg(null); try { const r = await api("/api/documents", { form: form() }); setMsg("Uploaded, scanned for injection/PII, and indexed." + (r.ml_warning ? " ⚠ " + r.ml_warning : "")); load(); } catch (e: any) { setErr(e.message); } }}>Upload</Button>
         </Card>
       )}
       {manage && <p className="text-xs text-slate-500">Administrators manage metadata and permissions here. Reading document <i>content</i> still requires the document's ACL to grant one of your roles.</p>}

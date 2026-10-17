@@ -19,8 +19,27 @@ _RULES: list[tuple[str, float, re.Pattern]] = [
 QUARANTINE_THRESHOLD = 0.7
 
 
-def scan(text: str) -> dict:
+def scan_regex(text: str) -> dict:
     hits = [(name, w) for name, w, rx in _RULES if rx.search(text)]
     score = min(1.0, max((w for _, w in hits), default=0.0) + 0.05 * max(0, len(hits) - 1))
     return {"score": round(score, 2), "rules": [n for n, _ in hits], "flagged": bool(hits),
             "quarantine": score >= QUARANTINE_THRESHOLD}
+
+
+ML_FLAG = 0.5
+ML_QUARANTINE = 0.8
+
+
+def scan(text: str) -> dict:
+    """Ensemble: regex rules OR the on-server ML classifier (when scikit-learn is available)."""
+    from . import ml
+    r = scan_regex(text)
+    p = ml.injection_prob(text) if ml.AVAILABLE else None
+    r["ml_score"] = None if p is None else round(p, 3)
+    if p is not None:
+        if p >= ML_FLAG and not r["flagged"]:
+            r["rules"] = r["rules"] + ["ml_classifier"]
+        r["flagged"] = r["flagged"] or p >= ML_FLAG
+        r["quarantine"] = r["quarantine"] or p >= ML_QUARANTINE
+        r["score"] = round(max(r["score"], p), 2)
+    return r

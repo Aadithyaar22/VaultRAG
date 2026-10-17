@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from .. import auth, db
-from ..services import authz, documents
-from ..services.extract import UnsupportedFile
+from ..services import audit, authz, documents, ml
+from ..services.extract import UnsupportedFile, extract_text
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 MAX_BYTES = 10 * 1024 * 1024
@@ -39,19 +39,39 @@ def _parse_roles(raw: str) -> list[str]:
     return [r.strip() for r in raw.split(",") if r.strip()]
 
 
+@router.post("/suggest")
+async def suggest(file: UploadFile = File(...), user=Depends(auth.require_capability("manage_documents"))):
+    """On-server ML: predict department / sensitivity and suggest an ACL (nothing is stored)."""
+    data = await file.read()
+    if len(data) > MAX_BYTES:
+        raise HTTPException(413, "file too large (10 MB max)")
+    try:
+        pred = ml.classify_document(extract_text(file.filename or "x.txt", data))
+    except UnsupportedFile as e:
+        raise HTTPException(415, str(e))
+    return {"available": pred is not None, "prediction": pred}
+
+
 @router.post("")
 async def upload(file: UploadFile = File(...), title: str = Form(...), sensitivity: str = Form("internal"),
                  allowed_roles: str = Form(...), user=Depends(auth.require_capability("manage_documents"))):
     data = await file.read()
     if len(data) > MAX_BYTES:
         raise HTTPException(413, "file too large (10 MB max)")
+    roles = _parse_roles(allowed_roles)
     try:
-        return documents.ingest(title=title, sensitivity=sensitivity, filename=file.filename or "upload.txt",
-                                data=data, allowed_roles=_parse_roles(allowed_roles), actor_id=user.id)
+        meta = documents.ingest(title=title, sensitivity=sensitivity, filename=file.filename or "upload.txt",
+                                data=data, allowed_roles=roles, actor_id=user.id)
     except UnsupportedFile as e:
         raise HTTPException(415, str(e))
     except ValueError as e:
         raise HTTPException(422, str(e))
+    warn = ml.overexposure(ml.classify_document(extract_text(file.filename or "x.txt", data)), roles, sensitivity)
+    if warn:
+        audit.log("acl_overexposure_warning", user_id=user.id, outcome="flagged", doc_id=meta["id"],
+                  warning=warn["warning"], predicted=warn["prediction"]["department"])
+    meta["ml_warning"] = warn["warning"] if warn else None
+    return meta
 
 
 @router.post("/{doc_id}/replace")

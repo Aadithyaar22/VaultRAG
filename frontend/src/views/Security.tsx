@@ -10,6 +10,12 @@ export default function Security() {
   const [v, setV] = useState<any>(null);
   const [pol, setPol] = useState<any>(null);
   const [open, setOpen] = useState<number | null>(null);
+  const [risk, setRisk] = useState<any>(null);
+  const [mlst, setMlst] = useState<any>(null);
+  useEffect(() => {
+    const t = () => api("/api/security/risk").then(setRisk).catch(() => {});
+    t(); const i = setInterval(t, 4000); api("/api/ml/status").then(setMlst).catch(() => {}); return () => clearInterval(i);
+  }, []);
   const load = () => api<AuditEvent[]>(`/api/security/events?limit=150${f ? `&event_type=${f}` : ""}`).then(setEv);
   useEffect(() => { load(); const t = setInterval(load, 4000); return () => clearInterval(t); }, [f]);
   useEffect(() => { api("/api/security/pii-policy").then(setPol); }, []);
@@ -33,6 +39,28 @@ export default function Security() {
             <p className="mt-2 text-xs text-slate-500">Redaction supplements — never replaces — authorization.</p>
           </Card>
         )}
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card title="🤖 User risk (IsolationForest, last 10 min)" right={<Badge tone="info">anomaly detection</Badge>}>
+          {!risk || risk.users.length === 0 ? <p className="text-sm text-slate-400">No recent activity.</p> : (
+            <ul className="grid gap-2 text-sm">{risk.users.map((u: any) => (
+              <li key={u.user_id} className="flex flex-wrap items-center gap-2">
+                <Badge tone={u.level === "high" ? "bad" : u.level === "elevated" ? "warn" : "ok"}>{u.level} · {u.risk}</Badge>
+                <span className="font-mono text-xs">{u.user_id}</span>
+                <span className="text-xs text-slate-400">{u.queries} queries · {u.denied_or_abstained} denied/abstained · {u.injection_events} injection</span>
+              </li>))}</ul>)}
+          <p className="mt-2 text-xs text-slate-500">Score = share of simulated normal activity windows that look more normal. Trained on synthetic baselines — a demo, not a calibrated detector.</p>
+        </Card>
+        {mlst?.available && (
+          <Card title="Models running on this server" right={<Badge tone="ok">{mlst.platform} · {mlst.byteorder}-endian</Badge>}>
+            <p className="text-xs text-slate-400">scikit-learn {mlst.sklearn} · Python {mlst.python} · trained at startup in {mlst.train_seconds}s ({Object.entries(mlst.sizes).map(([k, v]) => `${k}: ${v}`).join(", ")})</p>
+            <table className="mt-2 w-full text-xs"><tbody>
+              {Object.entries(mlst.evaluation.injection).filter(([k]) => k !== "note").map(([k, v]: any) => (
+                <tr key={k}><td className="py-0.5 text-slate-300">injection · {k.replace("_", " ")}</td><td>recall {v.recall}</td><td>false pos {v.false_positives}</td></tr>))}
+              <tr><td className="py-0.5 text-slate-300">document classifier</td><td>dept {mlst.evaluation.document_classifier.department_correct}</td><td>sens {mlst.evaluation.document_classifier.sensitivity_correct}</td></tr>
+            </tbody></table>
+            <p className="mt-2 text-xs text-slate-500">{mlst.evaluation.injection.note}</p>
+          </Card>)}
       </div>
       <Card title="Security events" right={<select aria-label="Filter events" className="rounded border border-line bg-ink px-2 py-1 text-sm" value={f} onChange={e => setF(e.target.value)}>
         {FILTERS.map(x => <option key={x} value={x}>{x || "all events"}</option>)}</select>}>

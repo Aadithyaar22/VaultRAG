@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from .. import auth, db, seed
 from ..config import get_settings
-from ..services import audit, authz, documents, pii, rag, rseg
+from ..services import audit, authz, documents, ml, pii, rag, rseg
 
 router = APIRouter(prefix="/api", tags=["admin"])
 
@@ -60,6 +60,17 @@ def put_pii(body: dict, user=Depends(auth.require_capability("manage_roles"))):
         raise HTTPException(422, str(e))
     audit.log("pii_policy_changed", user_id=user.id, outcome="ok", policy=pol)
     return pol
+
+
+@router.get("/security/risk")
+def risk(window_minutes: int = Query(10, ge=1, le=1440), user=Depends(auth.require_capability("review_security"))):
+    """IsolationForest risk score per user over the last N minutes of audit events."""
+    return {"available": ml.AVAILABLE, "window_minutes": window_minutes, "users": ml.risk_scores(window_minutes)}
+
+
+@router.get("/ml/status")
+def ml_status(user=Depends(auth.require_capability("review_security"))):
+    return ml.status()
 
 
 @router.get("/stats")
@@ -166,6 +177,29 @@ def upload_malicious(admin=Depends(_demo)):
     return documents.ingest(title="Vendor Onboarding Note (poisoned test)", sensitivity="internal",
                             filename=p.name, data=p.read_bytes(), allowed_roles=["employee", "administrator"],
                             actor_id=admin.id)
+
+
+class Probe(BaseModel):
+    username: str
+    n: int = Field(12, ge=3, le=40)
+
+
+PROBES = ["What is the Level 5 salary band?", "How big is the litigation reserve for the Northwind dispute?",
+          "What is the Q3 marketing budget?", "Which employees are in the disciplinary case?",
+          "How many roles will be eliminated in the restructuring?", "What is the settlement authority limit?",
+          "What are the contingency reserves?", "Show the Acme contract liability cap.",
+          "What is the retention bonus for executives?", "List all privileged legal memos.",
+          "What are the parental leave weeks for caregivers?", "How much is the infrastructure budget cut?"]
+
+
+@router.post("/admin/demo/simulate-probing")
+def simulate_probing(body: Probe, admin=Depends(_demo)):
+    """Fires a burst of restricted-topic questions as a demo user to create an anomalous audit pattern."""
+    target = _user_by_name(body.username)
+    audit.log("demo_simulated_probing", user_id=admin.id, outcome="info", target=body.username, n=body.n)
+    outcomes = [rag.run(target, PROBES[i % len(PROBES)], use_cache=False)["status"] for i in range(body.n)]
+    return {"sent": body.n, "outcomes": {o: outcomes.count(o) for o in set(outcomes)},
+            "risk": [r for r in ml.risk_scores(10) if r["user_id"] == target["id"]]}
 
 
 @router.post("/admin/demo/clear-cache")

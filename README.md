@@ -60,10 +60,17 @@ for tests/benchmarks/no-network demos; the UI labels it as such.
 7. Demo Controls → **Simulate outage** → every request incl. cached ones is denied (fail closed). Restore.
 8. Demo Controls → **Upload poisoned document**; alice asks about supplier payment → injection flagged on upload, malicious chunk quarantined (never reaches the model), legitimate sentence still answered. Security Center → expand the events and **Verify hash chain**.
 
+## On-server AI/ML (scikit-learn, trained at startup on the machine that runs the app — LinuxONE s390x)
+- **Document classifier** (TF-IDF + logistic regression): predicts department + sensitivity, pre-fills the upload ACL, and warns on *over-exposure* (e.g. HR-looking text shared with `employee`).
+- **Injection classifier** (word+char TF-IDF): ensemble with the regex rules. Held-out (16 malicious / 14 benign never used in training): ML alone 15/16 recall, 1/14 false positives; ensemble 16/16, 1/14.
+- **Behavioural anomaly detection** (IsolationForest over per-user audit-log windows): risk score in the Security Center; "Simulate probing" demo control.
+- Trained from **synthetic generated data** (no pickled models; not portable across sklearn/endianness). Demonstrations, not production-grade; documented in `docs/` and visible in Security Center → "Models running on this server".
+- IBM's mandatory Jupyter AI/ML lab was completed on our instance: see `docs/IBM_LAB_EVIDENCE.md`.
+
 ## Tests & evaluation
 
 ```bash
-cd backend && .venv/bin/python -m pytest -q          # 23 tests: RBAC, revocation, cache, versions, races,
+cd backend && .venv/bin/python -m pytest -q          # 32 tests: RBAC, revocation, cache, versions, races,
                                                      # authz outage, injection, PII, audit, metadata leakage
 .venv/bin/python -m scripts.benchmark --out ../docs/BENCHMARK.md
 ```

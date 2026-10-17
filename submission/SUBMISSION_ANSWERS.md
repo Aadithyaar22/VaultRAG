@@ -18,15 +18,15 @@ _(652/1024 chars)_
 
 ## How are you planning to solve the problem? (Brief Overview)
 
-VaultRAG is a FastAPI + React app. SQLite is the authoritative store for roles, document ACLs, and document/ACL/user versions. Per question: compute the user's allowed document IDs from the DB before retrieval, search only those, re-verify each candidate, quarantine injection-flagged chunks, then call an OpenAI-compatible LLM (Groq) with evidence framed as untrusted data and no tools. Our Revocation-Safe Evidence Gate records each answer's evidence (doc, version, ACL version) and, immediately before release, re-checks it in one consistent DB read. If anything changed, the answer is discarded and regenerated from current evidence or denied. Cached answers are revalidated, nothing is streamed early, and failures fail closed. PII redact/block policy and a hash-linked audit log complete it. 24 automated tests cover this.
+VaultRAG is a FastAPI + React app. SQLite is the authoritative store for roles, document ACLs, and document/ACL/user versions. Per question: compute the user's allowed document IDs from the DB before retrieval, search only those, re-verify each candidate, quarantine injection-flagged chunks, then call an OpenAI-compatible LLM (Groq) with evidence framed as untrusted data and no tools. Our Revocation-Safe Evidence Gate records each answer's evidence (doc, version, ACL version) and re-checks it in one DB read just before release; if anything changed, the answer is discarded and regenerated or denied. Cached answers are revalidated, nothing streams early, failures fail closed. On-server ML (scikit-learn) classifies uploads and warns on over-exposure, adds an injection classifier, and scores per-user risk with an IsolationForest. PII policy, a hash-linked audit log and 32 tests complete it.
 
-_(828/1024 chars)_
+_(899/1024 chars)_
 
 ## How does your solution leverage IBM Z / LinuxONE technologies?
 
-VaultRAG is deployed and running on an IBM LinuxONE Community Cloud virtual server (s390x, Ubuntu 24.04). We run the full application, the 24-test suite and the baseline benchmark there. The stack is dependency-light (pure-Python retrieval, no native ML wheels), so it ports to s390x without changes; we compiled the only native dependency (lxml) on the instance. Planned integration: use Z hardware cryptography / pervasive encryption for documents at rest and in transit, quantum-safe-ready TLS, and co-locate retrieval with enterprise data on Z so confidential content never leaves the platform. The security controls (DB-authoritative permissions, fail-closed gate) suit Z's role as the system of record for sensitive workloads.
+VaultRAG is deployed and running on an IBM LinuxONE Community Cloud virtual server (s390x, Ubuntu 24.04). The instance is an IBM z17 (machine type 9175) whose CPU reports the nnpa AI-accelerator feature. We run the app, the 32-test suite, benchmark and our scikit-learn models there (trained at startup), and completed IBM's Jupyter AI/ML lab (fraud LSTM, churn, MNIST to ONNX, hybrid ML+LLM loan notebook). The stack is dependency-light (pure-Python retrieval, no native ML wheels), so it ports to s390x without changes; we compiled the only native dependency (lxml) on the instance. Planned: move inference to an NNPA-accelerated path, a local Granite model so no text leaves the server, Z hardware crypto, and quantum-safe-ready TLS. The security controls (DB-authoritative permissions, fail-closed gate) suit Z's role as the system of record for sensitive workloads.
 
-_(732/1024 chars)_
+_(870/1024 chars)_
 
 ## What value does your solution deliver, and who will benefit from it?
 

@@ -39,6 +39,8 @@ export default function Demo() {
           <p className="mb-2 text-xs text-slate-400">While down, every request fails closed — including cached answers.</p>
           <div className="flex gap-2"><Button variant="danger" onClick={() => act("Simulate outage", "/api/admin/demo/authz-outage", { down: true })}>Simulate outage</Button>
             <Button variant="ghost" onClick={() => act("Restore authz", "/api/admin/demo/authz-outage", { down: false })}>Restore</Button></div></Card>
+        <Card title="4b · Probing attack (anomaly detection)"><p className="mb-2 text-xs text-slate-400">Fires 12 restricted-topic questions as “{who}” (all denied/abstained). Watch the user's risk score jump in Security Center.</p>
+          <Button variant="danger" onClick={() => act("Simulate probing", "/api/admin/demo/simulate-probing", { username: who, n: 12 })}>Simulate probing as “{who}”</Button></Card>
         <Card title="4 · Malicious document"><p className="mb-2 text-xs text-slate-400">Uploads a note containing override/exfiltration instructions. It is flagged, quarantined from the model context, and audited.</p>
           <Button variant="ghost" onClick={() => act("Upload malicious document", "/api/admin/demo/upload-malicious")}>Upload poisoned document</Button></Card>
         <Card title="5 · Housekeeping" right={state && <Badge tone="mute">{state.cache_entries} cached</Badge>}><div className="flex gap-2">

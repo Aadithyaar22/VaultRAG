@@ -46,10 +46,17 @@ svg{width:100%;height:auto} code{background:#0b1020;padding:2px 6px;border-radiu
 <div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">5</div></div>
 
 <div class="s"><h2>How we use IBM Z / LinuxONE</h2>
-<div class="grid"><div class="card"><h3 class="ok">Implemented</h3><ul><li>Deployed and run on a <b>LinuxONE Community Cloud</b> virtual server (s390x, Ubuntu 24.04)</li><li>Full test suite (24) and benchmark executed on s390x</li><li>Dependency-light design (pure-Python retrieval) so it ports to s390x without native ML wheels</li></ul></div>
-<div class="card"><h3 class="warn">Planned integration</h3><ul><li>Pervasive encryption / hardware crypto for data at rest and in transit</li><li>Quantum-safe-ready TLS for the Secure-AI track theme</li><li>Co-locating retrieval with enterprise data on Z so documents never leave the platform</li></ul></div></div>
-<p class="mute">Why Z: confidential-data workloads belong where the data and its security controls already live — keeping the assistant inside that boundary is the point of “innovation without exposure”.</p>
+<div class="grid"><div class="card"><h3 class="ok">Implemented &amp; verified</h3><ul style="font-size:21px"><li>App runs as a service on a <b>LinuxONE Community Cloud</b> server — <b>IBM z17 (machine type 9175), s390x</b>, Ubuntu 24.04; CPU reports the <code>nnpa</code> AI-accelerator feature</li><li>All 32 tests + benchmark executed on s390x</li><li>IBM's Jupyter AI/ML lab completed: Docker + IBM image, 4 notebooks (fraud LSTM, churn, MNIST→ONNX, hybrid loan ML+LLM) all ran clean</li><li>Our own ML models train on the server at startup (scikit-learn 1.4, big-endian)</li></ul></div>
+<div class="card"><h3 class="warn">Planned</h3><ul style="font-size:21px"><li>Move the injection classifier to a TensorFlow/ONNX path that can use the NNPA accelerator (today our scikit-learn models run on CPU)</li><li>Local Granite model via llama.cpp so no document text leaves the server</li><li>Hardware crypto / pervasive encryption; quantum-safe-ready TLS</li></ul></div></div>
+<p class="mute" style="font-size:19px">Why Z: confidential-data workloads belong where the data and its security controls already live — keep the assistant inside that boundary.</p>
 <div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">6</div></div>
+
+<div class="s"><h2>AI/ML running on this server (not just a hosted API)</h2>
+<div class="grid"><div class="card"><h3>1 · Document classifier</h3><p style="font-size:20px">Predicts department + sensitivity at upload, pre-fills the ACL, and <b>warns on over-exposure</b> (HR-looking text shared with “employee”). Held-out: 8/9 seed docs.</p></div>
+<div class="card"><h3>2 · Injection classifier + rules</h3><p style="font-size:20px">Held-out 16 attacks / 14 benign: ML alone 15/16 recall, 1/14 false positives; ensemble 16/16, 1/14. Catches paraphrases the regex misses.</p></div>
+<div class="card"><h3>3 · Behavioural anomaly detection</h3><p style="font-size:20px">IsolationForest over per-user audit windows → live risk score. A simulated probing burst scores <span class="bad">100 (high)</span>; normal users stay low.</p></div>
+<div class="card"><h3>Honest limits</h3><p style="font-size:20px">Trained on synthetic generated data; demonstrations, not production classifiers. Vocabulary overlaps the training banks, so scores are optimistic. Documented in the repo.</p></div></div>
+<div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">7</div></div>
 
 <div class="s"><h2>Evidence: measured against two baselines</h2>
 <table><tr><th>Metric (synthetic suite)</th><th>Conventional RAG</th><th>Filtered RAG</th><th>VaultRAG</th></tr>
@@ -60,18 +67,18 @@ svg{width:100%;height:auto} code{background:#0b1020;padding:2px 6px;border-radiu
 <tr><td>Cache correct after document replacement</td><td class="bad">no</td><td class="bad">no</td><td class="ok">yes</td></tr>
 <tr><td>RSEG overhead (cache-hit p50, ms)</td><td>0.03</td><td>0.03</td><td>0.11</td></tr></table>
 <p class="mute" style="font-size:18px">Conditions: synthetic data, offline extractive model (measures the authorization pipeline, not answer quality), in-memory SQLite, tiny suite, run on s390x. Zero observed leaks is <b>not</b> proof of zero leakage.</p>
-<div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">7</div></div>
+<div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">8</div></div>
 
 <div class="s"><h2>Value &amp; who benefits</h2>
 <div class="grid"><div class="card"><h3>Employees &amp; teams</h3><p>Ask questions of policies and reports in plain language and trust that answers respect their role.</p></div>
 <div class="card"><h3>Security &amp; compliance</h3><p>Revocation takes effect immediately, everywhere; every decision has an audit record explaining why it was allowed or blocked.</p></div>
 <div class="card"><h3>Admins</h3><p>Manage documents, roles and revocations without gaining automatic read access to the contents.</p></div>
 <div class="card"><h3>Honest limits</h3><p>Single-node SQLite, heuristic injection detector (small test set), no SSO/MFA. Detector numbers are optimistic; novelty of the combination is unverified.</p></div></div>
-<div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">8</div></div>
+<div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">9</div></div>
 
 <div class="s"><h2>Open-source stack &amp; next steps</h2>
-<p><b>Built with:</b> FastAPI, Pydantic, Uvicorn, SQLite, pypdf, python-docx, httpx, React, TypeScript, Vite, Tailwind CSS. LLM via any OpenAI-compatible endpoint (Groq <code>openai/gpt-oss-120b</code> in our demo).</p>
-<p><b>Next:</b> exercise Z hardware crypto, add a held-out injection benchmark, multi-node authorization service, SSO.</p>
+<p><b>Built with:</b> FastAPI, Pydantic, Uvicorn, SQLite, scikit-learn, pypdf, python-docx, httpx, React, TypeScript, Vite, Tailwind CSS. LLM via any OpenAI-compatible endpoint (Groq <code>openai/gpt-oss-120b</code> in our demo).</p>
+<p><b>Next:</b> NNPA-accelerated inference, local Granite model, Z hardware crypto, multi-node authorization service, SSO.</p>
 <h1 style="margin-top:70px;font-size:48px">Answers that are safe <u>at the moment they are released</u>.</h1>
-<p class="mute">Repo: https://github.com/Aadithyaar22/VaultRAG</p><div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">9</div></div>
+<p class="mute">Repo: https://github.com/Aadithyaar22/VaultRAG</p><div class="foot">Hacktivists · IBM Z Datathon 2026 Project</div><div class="n">10</div></div>
 </body></html>
