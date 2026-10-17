@@ -8,6 +8,7 @@ const I = ({ d, size = 18 }: { d: string; size?: number }) => (
   </svg>
 );
 export const icons = {
+  home: <I d="M4 11l8-7 8 7|M6 10v9h12v-9|M10 19v-5h4v5" />,
   chat: <I d="M4 5h16v11H9l-5 4z|M8 9h8M8 12h5" />,
   dashboard: <I d="M4 13h6V4H4z|M14 20h6V11h-6z|M4 20h6v-4H4z|M14 8h6V4h-6z" />,
   vault: <I d="M5 8h14v11H5z|M8 8V6a4 4 0 0 1 8 0v2|M12 12v3" />,
@@ -53,9 +54,9 @@ export const PageHeader = ({ title, desc, right }: { title: string; desc: string
 
 // Status is carried by shape and weight, not hue: filled = ok, hollow/dashed = caution, inverted = blocked.
 const tones: Record<string, string> = {
-  ok: "bg-[#efe6d2]/12 text-[#efe6d2] border-[#efe6d2]/40",
-  warn: "bg-transparent text-[#d8cdb4] border-dashed border-[#d8cdb4]/60",
-  bad: "bg-[#efe6d2] text-[#0b0a08] border-[#efe6d2]",
+  ok: "bg-white/12 text-white border-white/40",
+  warn: "bg-transparent text-white/75 border-dashed border-white/50",
+  bad: "bg-white text-[#0b0a08] border-white",
   info: "bg-white/6 text-white/90 border-white/20",
   mute: "bg-white/5 text-white/60 border-white/10",
 };
@@ -71,8 +72,8 @@ export const Badge = ({ tone = "mute", children }: { tone?: keyof typeof tones; 
 /* ---------- buttons ---------- */
 type Variant = "primary" | "ghost" | "danger";
 /** Primary buttons follow the current page accent (--accent), falling back to teal. */
-const ACCENT_BG = "linear-gradient(120deg, #efe6d2, #ffffff)";
-const ACCENT_GLOW = "0 0 30px -8px rgba(239, 230, 210, 0.55)";
+const ACCENT_BG = "linear-gradient(120deg, #ffffff 35%, #f1ead8)";
+const ACCENT_GLOW = "0 0 30px -8px rgba(255, 255, 255, 0.5)";
 const variantCls: Record<Variant, string> = {
   primary: "text-ink",
   ghost: "border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10 hover:border-white/25",
@@ -141,15 +142,15 @@ export const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
 );
 
 export const Stat = ({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) => (
-  <div className="liquid p-5" style={{ background: `radial-gradient(130% 100% at 0% 0%, #efe6d226, transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))`, boxShadow: `inset 0 2px 0 0 #efe6d255, 0 24px 60px -28px rgba(0,0,0,0.75)` }}>
-    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-300"><span className="h-2 w-2 rounded-full" style={{ background: "#efe6d2", boxShadow: "0 0 10px rgba(239,230,210,0.6)" }} aria-hidden />{label}</div>
+  <div className="liquid p-5" style={{ background: `radial-gradient(130% 100% at 0% 0%, #ffffff14, transparent 60%), linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025))`, boxShadow: `inset 0 2px 0 0 #ffffff40, 0 24px 60px -28px rgba(0,0,0,0.75)` }}>
+    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-300"><span className="h-2 w-2 rounded-full" style={{ background: "#ffffff", boxShadow: "0 0 10px rgba(255,255,255,0.6)" }} aria-hidden />{label}</div>
     <div className="mt-2 font-display text-4xl font-bold tracking-tight text-white">{value}</div>
     {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
   </div>
 );
 
 export const statusTone = (s: string) => ({ answered: "ok", abstained: "warn", denied: "bad", error: "bad", released: "ok", blocked: "bad", flagged: "warn", discarded: "bad", ok: "ok" } as Record<string, any>)[s] || "mute";
-export const ErrorNote = ({ msg }: { msg: string | null }) => msg ? <div role="alert" className="rounded-2xl border border-[#efe6d2]/50 bg-[#efe6d2]/10 px-4 py-3 text-sm text-[#efe6d2]"><b className="font-semibold">Error · </b>{msg}</div> : null;
+export const ErrorNote = ({ msg }: { msg: string | null }) => msg ? <div role="alert" className="rounded-2xl border border-white/50 bg-white/10 px-4 py-3 text-sm text-white"><b className="font-semibold">Error · </b>{msg}</div> : null;
 
 /** Minimal inline markdown (bold only) for model answers; everything else renders as plain text (no HTML injection). */
 export const RichText = ({ text }: { text: string }) => (

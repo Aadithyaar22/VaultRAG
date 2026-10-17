@@ -55,8 +55,8 @@ export default function Chat({ user, desc }: { user: User; desc: string }) {
             <ErrorNote msg={t.err || null} />
             {t.r && (
               <>
-                {t.r.status === "denied" && <p className="text-sm text-[#efe6d2] font-medium">Access denied: this response was blocked and discarded ({t.r.reason}).</p>}
-                {t.r.status === "error" && <p className="text-sm text-[#efe6d2] font-medium">{t.r.answer}</p>}
+                {t.r.status === "denied" && <p className="text-sm text-white font-medium">Access denied: this response was blocked and discarded ({t.r.reason}).</p>}
+                {t.r.status === "error" && <p className="text-sm text-white font-medium">{t.r.answer}</p>}
                 {(t.r.status === "answered" || t.r.status === "abstained") && <p className="whitespace-pre-wrap text-sm leading-relaxed"><RichText text={t.r.answer} /></p>}
                 {t.r.citations.length > 0 && (
                   <div className="mt-3 grid gap-1">

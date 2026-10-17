@@ -52,7 +52,7 @@ export default function SignIn({ onBack, onLogin }: { onBack: () => void; onLogi
           <div className="grid gap-3 sm:grid-cols-2">
             {demo.map(d => (
               <button key={d.username} onClick={() => submit(d.username, "demo-pass")} disabled={busy}
-                className="liquid-flat p-4 text-left transition duration-200 hover:scale-[1.015] hover:border-[#efe6d2]/50 hover:bg-white/8 disabled:opacity-60">
+                className="liquid-flat p-4 text-left transition duration-200 hover:scale-[1.015] hover:border-white/50 hover:bg-white/8 disabled:opacity-60">
                 <div className="font-display text-base font-semibold text-white">{d.display_name}</div>
                 <div className="mt-2 flex flex-wrap gap-1.5">{d.roles.map(r => <Badge key={r} tone="info">{r}</Badge>)}</div>
                 <p className="mt-2 text-sm leading-snug text-slate-400">{SEES[d.username] || "Role-based access."}</p>

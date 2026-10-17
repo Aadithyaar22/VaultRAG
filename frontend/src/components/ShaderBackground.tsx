@@ -44,20 +44,20 @@ void main(){
   vec2 r=vec2(fbm(p*0.6+1.5*q+vec2(1.7,9.2)+t*0.6), fbm(p*0.6+1.5*q+vec2(8.3,2.8)-t*0.5));
   float f=fbm(p*0.5+1.6*r);
 
-  // black / warm-grey / cream / white only
-  vec3 base  = vec3(0.012,0.011,0.010);
-  vec3 grey  = vec3(0.20,0.19,0.17);
-  vec3 cream = vec3(0.86,0.79,0.64);
+  // black / neutral grey / white, with only a faint cream warmth
+  vec3 base  = vec3(0.010,0.010,0.010);
+  vec3 grey  = vec3(0.19,0.19,0.19);
+  vec3 cream = vec3(0.93,0.89,0.80);
   vec3 white = vec3(1.0,0.98,0.94);
 
   vec3 col=base;
   col=mix(col,grey, smoothstep(-0.35,0.65,q.x)*0.85);
-  col=mix(col,cream*0.55,smoothstep(-0.05,0.75,r.y)*0.55);
-  col=mix(col,cream*0.75,smoothstep(0.15,0.95,f+0.2*q.y)*0.40);
+  col=mix(col,vec3(0.50),smoothstep(-0.05,0.75,r.y)*0.45);
+  col=mix(col,mix(vec3(0.62),cream*0.7,0.25),smoothstep(0.15,0.95,f+0.2*q.y)*0.35);
   col+= white*smoothstep(0.45,1.0,f+0.3*r.x)*0.16;                        // soft highlights
 
   // very gentle warm glow at the (smoothed) pointer
-  col+= cream * exp(-dist*dist*3.5) * (0.05+0.12*u_energy);
+  col+= mix(vec3(1.0),cream,0.25) * exp(-dist*dist*3.5) * (0.05+0.12*u_energy);
 
   col*= 1.0-smoothstep(0.55,1.6,length(uv-0.5)*1.4)*0.5;                  // vignette
   gl_FragColor=vec4(col,1.0);

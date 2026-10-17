@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
-/* Monochrome luxe theme: black, white and cream only. Fonts degrade to system fonts if the CDN is blocked. */
+/* Monochrome theme: black and white, with cream used only as a faint warm touch. Fonts degrade to system fonts if the CDN is blocked. */
 @theme {
-  --color-ink: #070706;
-  --color-panel: #0e0d0b;
-  --color-panel2: #151412;
-  --color-line: #2a2823;
-  --color-cream: #efe6d2;
-  --color-cream-dim: #cfc4aa;
-  --color-brand: #efe6d2;
-  /* warm neutral greys replace Tailwind's blue-tinted slate everywhere */
-  --color-slate-50: #faf8f3; --color-slate-100: #f2eee5; --color-slate-200: #e3ddd0; --color-slate-300: #cdc6b6;
-  --color-slate-400: #a8a192; --color-slate-500: #7f796c; --color-slate-600: #5d584e; --color-slate-700: #433f38;
-  --color-slate-800: #2c2924; --color-slate-900: #191714; --color-slate-950: #0e0d0b;
+  --color-ink: #050505;
+  --color-panel: #0c0c0c;
+  --color-panel2: #141414;
+  --color-line: #262626;
+  --color-cream: #f1ead8;
+  --color-cream-dim: #d9d2c0;
+  --color-brand: #ffffff;
+  /* neutral greys replace Tailwind's blue-tinted slate everywhere */
+  --color-slate-50: #fafafa; --color-slate-100: #f2f2f2; --color-slate-200: #e4e4e4; --color-slate-300: #cfcfcf;
+  --color-slate-400: #a9a9a9; --color-slate-500: #7f7f7f; --color-slate-600: #5c5c5c; --color-slate-700: #414141;
+  --color-slate-800: #2b2b2b; --color-slate-900: #181818; --color-slate-950: #0e0e0e;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -20,7 +20,7 @@
 html, body, #root { height: 100%; }
 body {
   background: var(--color-ink);
-  color: #ece8df;
+  color: #ededed;
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.6;
@@ -32,7 +32,7 @@ code, pre, kbd { font-family: var(--font-mono); }
 :focus-visible { outline: 2px solid var(--color-cream); outline-offset: 3px; }
 input[type="checkbox"] { accent-color: var(--color-cream); width: 16px; height: 16px; }
 select { font-size: 0.85rem; }
-::selection { background: rgba(239, 230, 210, 0.3); }
+::selection { background: rgba(255, 255, 255, 0.3); }
 
 /* Liquid surface: soft, large radius, translucent, lit from above */
 .liquid {
@@ -44,9 +44,9 @@ select { font-size: 0.85rem; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 24px 60px -28px rgba(0,0,0,0.8);
 }
 .liquid-flat { border-radius: 1rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); }
-.glow-focus:focus { border-color: rgba(239,230,210,0.7); box-shadow: 0 0 0 4px rgba(239,230,210,0.12); outline: none; }
+.glow-focus:focus { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 0 4px rgba(255,255,255,0.12); outline: none; }
 
-.gradient-text { background: linear-gradient(110deg, #ffffff 10%, #f3ecdb 50%, #d9cdb0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gradient-text { background: linear-gradient(110deg, #ffffff 0%, #ffffff 62%, #f1ead8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 @keyframes bead { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 .bead { animation: bead 2.4s ease-in-out infinite; }
@@ -60,6 +60,6 @@ select, input[type="text"], input[type="search"] {
   border-radius: 9999px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.13);
   padding: 0.5rem 0.95rem; color: inherit; font-size: 0.85rem;
 }
-select option { background: #0e0d0b; }
-input[type="file"] { font-size: 0.85rem; color: #cdc6b6; }
-input[type="file"]::file-selector-button { margin-right: 0.8rem; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #ece8df; border-radius: 9999px; padding: 0.45rem 1rem; cursor: pointer; }
+select option { background: #0e0e0e; }
+input[type="file"] { font-size: 0.85rem; color: #cfcfcf; }
+input[type="file"]::file-selector-button { margin-right: 0.8rem; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #ededed; border-radius: 9999px; padding: 0.45rem 1rem; cursor: pointer; }

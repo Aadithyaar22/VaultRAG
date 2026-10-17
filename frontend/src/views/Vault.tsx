@@ -41,7 +41,7 @@ export default function Vault({ user, desc }: { user: User; desc: string }) {
   return (
     <div className="mx-auto grid max-w-5xl gap-5">
       <PageHeader title="Document Vault" desc={desc} />
-      <ErrorNote msg={err} />{msg && <div role="status" className="rounded-lg border border-[#efe6d2]/40 bg-[#efe6d2]/10 px-3 py-2 text-sm text-[#efe6d2]">{msg}</div>}
+      <ErrorNote msg={err} />{msg && <div role="status" className="rounded-lg border border-white/40 bg-white/10 px-3 py-2 text-sm text-white">{msg}</div>}
       {manage && (
         <Card title="Upload or replace a document" right={<Badge tone="mute">PDF · TXT · DOCX · ≤10 MB</Badge>}>
           <div className="grid gap-2 md:grid-cols-3">
@@ -73,7 +73,7 @@ export default function Vault({ user, desc }: { user: User; desc: string }) {
             {manage ? (
               <>
                 <div className="flex flex-wrap gap-3 text-sm">{ROLES.map(r => <label key={r} className="flex items-center gap-1"><input type="checkbox" checked={d.allowed_roles.includes(r)} onChange={() => toggleRole(d, r)} />{r}</label>)}</div>
-                {d.denied_users.length > 0 && <p className="mt-2 text-xs text-[#d8cdb4]">Explicit deny: {d.denied_users.join(", ")}
+                {d.denied_users.length > 0 && <p className="mt-2 text-xs text-white/75">Explicit deny: {d.denied_users.join(", ")}
                   <button className="ml-2 underline" onClick={() => run(() => api(`/api/documents/${d.id}/acl`, { method: "PUT", body: { denied_users: [] } }), "Explicit denies cleared.")}>clear</button></p>}
                 <p className="mt-2 text-xs text-slate-500">ACL version {d.acl_version} · {d.versions.length} version(s): {d.versions.map((v: any) => `v${v.version} (${v.chunk_count} chunks, ${v.content_sha256.slice(0, 8)})`).join(" · ")}</p>
                 <div className="mt-3"><SplitButton variant="ghost" label="Replace with selected file" disabled={!file} onClick={() => run(() => api(`/api/documents/${d.id}/replace`, { form: form() }), "Replaced with a new version — caches invalidated.")} menuLabel="More document actions"
